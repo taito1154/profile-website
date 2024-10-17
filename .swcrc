@@ -1,0 +1,8 @@
+// .swcrc file
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript"
+    }
+  }
+}
