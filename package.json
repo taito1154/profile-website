@@ -24,6 +24,9 @@
     "webpack-dev-server": "^5.1.0"
   },
   "dependencies": {
-    "p5": "^1.11.0"
+    "alpinejs": "^3.14.3",
+    "gsap": "^3.12.5",
+    "p5": "^1.11.0",
+    "tweakpane": "^4.0.4"
   }
 }

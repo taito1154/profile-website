@@ -1,0 +1,47 @@
+// 変数定義
+$header-bg-color: #4caf50;
+$header-text-color: white;
+$header-padding: 15px 20px;
+$nav-link-spacing: 20px;
+// ミックスイン定義
+@mixin flex-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+// 基本スタイル
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+}
+// ヘッダースタイル
+.main-header {
+  background-color: $header-bg-color;
+  color: $header-text-color;
+  padding: $header-padding;
+  @include flex-center;
+
+  .logo {
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .main-nav {
+    ul {
+      list-style-type: none;
+      padding: 0;
+      @include flex-center;
+      li {
+        margin-left: $nav-link-spacing;
+        a {
+          color: $header-text-color;
+          text-decoration: none;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
