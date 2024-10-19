@@ -1,29 +1,41 @@
-// 変数定義
-$header-bg-color: #4caf50;
-$header-text-color: white;
-$header-padding: 15px 20px;
-$nav-link-spacing: 20px;
-// ミックスイン定義
+// 変数
+$primary-color: #333;
+$secondary-color: #666;
+$background-color: #f4f4f4;
+$header-height: 60px;
+
+// ミックスイン
 @mixin flex-center {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
-// 基本スタイル
+
 body {
   font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: $primary-color;
+  background-color: $background-color;
   margin: 0;
+  padding: 0;
 }
-// ヘッダースタイル
+
 .main-header {
-  background-color: $header-bg-color;
-  color: $header-text-color;
-  padding: $header-padding;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $header-height;
   @include flex-center;
+  justify-content: space-between;
+  padding: 0 20px;
 
   .logo {
     h1 {
       margin: 0;
+      font-size: 1.5rem;
     }
   }
 
@@ -32,16 +44,43 @@ body {
       list-style-type: none;
       padding: 0;
       @include flex-center;
+
       li {
-        margin-left: $nav-link-spacing;
+        margin-left: 20px;
+
         a {
-          color: $header-text-color;
           text-decoration: none;
-          &:hover {
-            text-decoration: underline;
+          color: $primary-color;
+          font-weight: bold;
+          transition: color 0.3s ease;
+
+          &:hover,
+          &.active {
+            color: $secondary-color;
           }
         }
       }
     }
   }
+}
+
+main {
+  padding-top: $header-height + 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section {
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: $primary-color;
+  color: white;
 }
