@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shungo Hirata</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="css/styles.css" />
     <script
       defer
       src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
@@ -13,10 +13,17 @@
     <script src="https://cdn.jsdelivr.net/npm/tweakpane@3.0.2/dist/tweakpane.min.js"></script>
   </head>
   <body x-data="appData()">
+    <div class="frame" id="Frame">
+      <div class="frame_line frame-left"></div>
+      <div class="frame_line frame-right"></div>
+      <div class="frame_line frame-top"></div>
+      <div class="frame_line frame-bottom"></div>
+    </div>
     <header class="main-header">
       <div class="logo">
         <h1>Shungo Hirata</h1>
       </div>
+
       <nav class="main-nav">
         <ul>
           <li>
