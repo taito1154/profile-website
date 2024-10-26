@@ -1,5 +1,6 @@
 const PARAMS = {
   animationSpeed: 0.5,
+  introAnimationDuration: 10,
 };
 function appData() {
   return {
@@ -27,11 +28,37 @@ function appData() {
 
 // Initial animation
 document.addEventListener("DOMContentLoaded", () => {
+  // 動画コンテナのアニメーション
+  const videoContainer = document.querySelector(".video-container");
+  gsap.fromTo(
+    videoContainer,
+    { opacity: 1, scale: 1.1, zIndex: 3 },
+    {
+      opacity: 0.8,
+      scale: 1,
+      zIndex: -1,
+      duration: PARAMS.introAnimationDuration,
+      ease: "power2.out",
+    }
+  );
+
+  const video = videoContainer.querySelector("video");
+  gsap.fromTo(
+    video,
+    { filter: "blur(10px)" },
+    {
+      filter: "blur(0px)",
+      duration: PARAMS.introAnimationDuration,
+      ease: "power2.out",
+    }
+  );
+
   gsap.from(".main-header", {
     opacity: 0,
     y: -50,
     duration: 1,
     ease: "power3.out",
+    delay: PARAMS.introAnimationDuration * 0.5,
   });
   gsap.from(".section", {
     opacity: 0,
@@ -39,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     duration: 1,
     ease: "power3.out",
     stagger: 0.2,
+    delay: PARAMS.introAnimationDuration * 0.75,
   });
 
   // Tweakpane setup
