@@ -28,6 +28,36 @@ function appData() {
 
 // Initial animation
 document.addEventListener("DOMContentLoaded", () => {
+  const bigButtons = document.querySelector(".bigButtons");
+  const sections = document.querySelector(".sections");
+  const bigBTNs = document.querySelectorAll(".bigBTN");
+  const homeLink = document.querySelector('.main-nav a[href="#home"]');
+
+  bigBTNs.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sectionId = btn.getAttribute("data-section");
+      // ボタン達を非表示に
+      bigButtons.style.display = "none";
+      sections.style.display = "block";
+      // クリックしたセクションの表示
+      document.querySelectorAll(".section").forEach((section) => {
+        if (section.id === sectionId) {
+          section.style.display = "block";
+        } else {
+          section.style.display = "none";
+        }
+      });
+      homeLink.classList.remove("active");
+    });
+  });
+  // homeLinkを押すと
+  homeLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    sections.style.display = "none";
+    bigButtons.style.display = "flex";
+    homeLink.classList.add("active");
+  });
+
   // 動画コンテナのアニメーション
   const videoContainer = document.querySelector(".video-container");
   gsap.fromTo(
@@ -52,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ease: "power2.out",
     }
   );
-
   gsap.from(".main-header", {
     opacity: 0,
     y: -50,
@@ -68,7 +97,34 @@ document.addEventListener("DOMContentLoaded", () => {
     stagger: 0.2,
     delay: PARAMS.introAnimationDuration * 0.75,
   });
+  // フレームのアニメーション
+  gsap.to(".frame-left, .frame-right", {
+    scaleY: 1,
+    opacity: 1,
+    duration: 1,
+    ease: "power3.out",
+    stagger: 0.2,
+    delay: PARAMS.introAnimationDuration * 0.5,
+    autoAlpha: 1,
+  });
 
+  gsap.to(".frame-top, .frame-bottom", {
+    scaleX: 1,
+    opacity: 1,
+    duration: 1,
+    ease: "power3.out",
+    stagger: 0.2,
+    delay: PARAMS.introAnimationDuration * 0.5,
+    autoAlpha: 1,
+  });
+  // フッターのアニメーション
+  gsap.from("footer", {
+    y: 100,
+    opacity: 0,
+    duration: 1,
+    ease: "power3.out",
+    delay: PARAMS.introAnimationDuration * 0.75,
+  });
   // Tweakpane setup
   const pane = new Tweakpane.Pane();
 

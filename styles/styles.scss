@@ -10,6 +10,12 @@ $min-viewport-padding: 4vmin;
 $base-font-size: 12px;
 $full-width: 100vw;
 $full-height: 100vh;
+$button-size: 200px;
+$button-color: $primary-color;
+$button-hover-color: darken($primary-color, 10%);
+$button-text-color: white;
+$button-font-size: 1.5rem;
+$button-transition: all 0.3s ease;
 
 :root {
   --c-bg: hsl(0, 0%, #{$bg-lightness});
@@ -31,6 +37,76 @@ body {
   margin: 0;
   padding: var(--pad);
 }
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh-#{$header-height});
+  padding-top: calc(#{$header-height} + var(--pad));
+  box-sizing: border-box;
+}
+.bigButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 20px;
+}
+
+.bigBTN {
+  width: $button-size;
+  height: $button-size;
+  border-radius: 50%;
+  background-color: $button-color;
+  color: $button-text-color;
+  border: none;
+  cursor: pointer;
+  font-size: $button-font-size;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: $button-transition;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  &:hover,
+  &:focus {
+    background-color: $button-hover-color;
+    transform: scale(1.05);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($button-color, 0.5), 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .big-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .big-btn {
+    width: calc(#{$button-size} * 0.8);
+    height: calc(#{$button-size} * 0.8);
+    font-size: calc(#{$button-font-size} * 0.8);
+  }
+}
+
+@media (max-width: 480px) {
+  .big-btn {
+    width: calc(#{$button-size} * 0.6);
+    height: calc(#{$button-size} * 0.6);
+    font-size: calc(#{$button-font-size} * 0.6);
+  }
+}
 .video-container {
   position: fixed;
   top: 0;
@@ -38,7 +114,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 2;
+  z-index: -1;
 
   video {
     position: absolute;
@@ -60,12 +136,14 @@ body {
   bottom: var(--pad);
   pointer-events: none;
   overflow: hidden;
+  z-index: 10;
 }
 
 .frame_line {
+  transform-origin: center;
   position: absolute;
   background-color: white;
-  opacity: 1;
+  opacity: 0;
 }
 
 .frame-left {
@@ -154,8 +232,15 @@ main {
 }
 
 footer {
-  text-align: center;
-  padding: 20px;
+  position: fixed;
+  bottom: var(--pad);
+  left: var(--pad);
+  right: var(--pad);
+  padding: 5px;
   background-color: $primary-color;
   color: white;
+  height: 40px;
+  display: flex;
+  align-items: center; // 垂直方向の中央揃え
+  justify-content: center; // 水平方向の中央揃え
 }

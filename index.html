@@ -68,7 +68,14 @@
         </ul>
       </nav>
     </header>
-    <main>
+    <div class="main-content">
+      <div class="bigButtons">
+        <button class="bigBTN" data-section="about">About</button>
+        <button class="bigBTN" data-section="work">Work</button>
+        <button class="bigBTN" data-section="contact">Contact</button>
+      </div>
+    </div>
+    <main class="sections" style="display: none">
       <section id="home" x-show="currentSection === 'home'" class="section">
         <h2>Home</h2>
         <p>Welcome to my profile website</p>
