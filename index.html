@@ -41,7 +41,7 @@
               >Home</a
             >
           </li>
-          <li>
+          <!-- <li>
             <a
               href="#about"
               @click.prevent="switchSection('about')"
@@ -64,15 +64,36 @@
               :class="{'active': currentSection === 'contact'}"
               >Contact</a
             >
-          </li>
+          </li> -->
         </ul>
       </nav>
     </header>
     <div class="main-content">
       <div class="bigButtons">
-        <button class="bigBTN" data-section="about">About</button>
-        <button class="bigBTN" data-section="work">Work</button>
-        <button class="bigBTN" data-section="contact">Contact</button>
+        <button class="bigBTN" data-section="about">
+          <span>About</span>
+          <div class="btn-video-container">
+            <video muted loop playsinline>
+              <source src="video/about-Shungo-video.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </button>
+        <button class="bigBTN" data-section="work">
+          <span>Work</span>
+          <div class="btn-video-container">
+            <video muted loop playsinline>
+              <source src="video/work-Shungo-video.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </button>
+        <button class="bigBTN" data-section="contact">
+          <span>Contact</span>
+          <div class="btn-video-container">
+            <video muted loop playsinline>
+              <source src="video/contact-Shungo-video.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </button>
       </div>
     </div>
     <main class="sections" style="display: none">

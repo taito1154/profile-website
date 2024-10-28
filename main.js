@@ -33,7 +33,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const bigBTNs = document.querySelectorAll(".bigBTN");
   const homeLink = document.querySelector('.main-nav a[href="#home"]');
 
+  // ボタンのアニメーション
+  gsap.fromTo(
+    bigBTNs,
+    {
+      scale: 0.5,
+      opacity: 0,
+    },
+    {
+      scale: 1,
+      opacity: 1,
+      duration: 1,
+      ease: "back.out(1.7)",
+      stagger: 0.2,
+      delay: PARAMS.introAnimationDuration * 0.5,
+    }
+  );
+
   bigBTNs.forEach((btn) => {
+    const video = btn.querySelector("video");
+
+    // 動画を自動再生（ミュート状態で）
+    video.play().catch((error) => {
+      console.error("Video playback failed:", error);
+    });
     btn.addEventListener("click", () => {
       const sectionId = btn.getAttribute("data-section");
       // ボタン達を非表示に
@@ -123,8 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
     opacity: 0,
     duration: 1,
     ease: "power3.out",
-    delay: PARAMS.introAnimationDuration * 0.75,
+    delay: PARAMS.introAnimationDuration * 0.5,
   });
+
   // Tweakpane setup
   const pane = new Tweakpane.Pane();
 

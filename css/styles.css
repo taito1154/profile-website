@@ -24,15 +24,19 @@ body {
 }
 
 .bigButtons {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  top: calc(var(--pad) + 60px);
+  bottom: calc(var(--pad) + 40px);
   display: flex;
-  flex-direction: column;
-  gap: 30px;
-  padding: 20px;
+  justify-content: center;
+  align-items: center;
 }
 
 .bigBTN {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
   background-color: #333;
   color: white;
@@ -45,37 +49,72 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.bigBTN span {
+  position: relative;
+  z-index: 2;
+}
+.bigBTN .btn-video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity all 0.3s ease ease;
+}
+.bigBTN .btn-video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .bigBTN:hover, .bigBTN:focus {
   background-color: rgb(25.5, 25.5, 25.5);
   transform: scale(1.05);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+.bigBTN:hover .btn-video-container, .bigBTN:focus .btn-video-container {
+  opacity: 1;
 }
 .bigBTN:active {
   transform: scale(0.98);
 }
 .bigBTN:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.5), 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.bigBTN:nth-child(1) {
+  position: absolute;
+  top: 10%;
+}
+.bigBTN:nth-child(2) {
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+}
+.bigBTN:nth-child(3) {
+  position: absolute;
+  bottom: 10%;
+  left: 10%;
 }
 
 @media (max-width: 768px) {
-  .big-buttons {
+  .bigButtons {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
   }
-  .big-btn {
-    width: calc(200px * 0.8);
-    height: calc(200px * 0.8);
+  .bigBTN {
+    width: calc(300px * 0.8);
+    height: calc(300px * 0.8);
     font-size: calc(1.5rem * 0.8);
   }
 }
 @media (max-width: 480px) {
-  .big-btn {
-    width: calc(200px * 0.6);
-    height: calc(200px * 0.6);
+  .bigBTN {
+    width: calc(300px * 0.6);
+    height: calc(300px * 0.6);
     font-size: calc(1.5rem * 0.6);
   }
 }
@@ -148,7 +187,6 @@ body {
 
 .main-header {
   background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: var(--pad);
   left: var(--pad);
@@ -194,7 +232,6 @@ main {
   padding: 20px;
   background-color: white;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
