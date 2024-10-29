@@ -70,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 既存のアニメーションを中止
       if (kemuriAnimation) kemuriAnimation.kill();
       if (mainAnimation) mainAnimation.kill();
+      btn.style.transform = "scale(1.2)";
       kemuriAnimation = gsap.to(kemuriContainer, {
         opacity: 1,
         duration: 2,
@@ -86,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 既存のアニメーションを中止
       if (kemuriAnimation) kemuriAnimation.kill();
       if (mainAnimation) mainAnimation.kill();
+      btn.style.transform = "scale(1)";
 
       // 即座に不透明度を0に設定
       gsap.set([mainContainer, kemuriContainer], { opacity: 0 });
