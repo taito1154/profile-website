@@ -2,29 +2,29 @@ const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,
 };
-function appData() {
-  return {
-    currentSection: "home",
-    switchSection(section) {
-      const oldSection = document.querySelector(`#${this.currentSection}`);
-      const newSection = document.querySelector(`#${section}`);
+// function appData() {
+//   return {
+//     currentSection: "home",
+//     switchSection(section) {
+//       const oldSection = document.querySelector(`#${this.currentSection}`);
+//       const newSection = document.querySelector(`#${section}`);
 
-      gsap.to(oldSection, {
-        opacity: 0,
-        y: 50,
-        duration: PARAMS.animationSpeed,
-        onComplete: () => {
-          this.currentSection = section;
-          gsap.fromTo(
-            newSection,
-            { opacity: 0, y: 50 },
-            { opacity: 1, y: 0, duration: PARAMS.animationSpeed }
-          );
-        },
-      });
-    },
-  };
-}
+//       gsap.to(oldSection, {
+//         opacity: 0,
+//         y: 50,
+//         duration: PARAMS.animationSpeed,
+//         onComplete: () => {
+//           this.currentSection = section;
+//           gsap.fromTo(
+//             newSection,
+//             { opacity: 0, y: 50 },
+//             { opacity: 1, y: 0, duration: PARAMS.animationSpeed }
+//           );
+//         },
+//       });
+//     },
+//   };
+// }
 
 // Initial animation
 document.addEventListener("DOMContentLoaded", () => {
@@ -51,11 +51,44 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   bigBTNs.forEach((btn) => {
-    const video = btn.querySelector("video");
+    const video = btn.querySelector(".btn-video-container video");
+    const kemuriVideo = btn.querySelector(".kemuri-video");
+    const kemuriContainer = btn.querySelector(".kemuri-video-container");
+    const mainContainer = btn.querySelector(".btn-video-container");
+    let kemuriAnimation;
+    let mainAnimation;
 
+    // 煙の動画を常に再生
+    kemuriVideo.play().catch((error) => {
+      console.error("Smoke video playback failed:", error);
+    });
     // 動画を自動再生（ミュート状態で）
     video.play().catch((error) => {
       console.error("Video playback failed:", error);
+    });
+    btn.addEventListener("mouseenter", () => {
+      // 既存のアニメーションを中止
+      if (kemuriAnimation) kemuriAnimation.kill();
+      if (mainAnimation) mainAnimation.kill();
+      kemuriAnimation = gsap.to(kemuriContainer, {
+        opacity: 1,
+        duration: 2,
+        ease: "power2.out",
+      });
+      mainAnimation = gsap.to(mainContainer, {
+        opacity: 1,
+        duration: 2,
+        delay: 1,
+        ease: "power2.out",
+      });
+    });
+    btn.addEventListener("mouseleave", () => {
+      // 既存のアニメーションを中止
+      if (kemuriAnimation) kemuriAnimation.kill();
+      if (mainAnimation) mainAnimation.kill();
+
+      // 即座に不透明度を0に設定
+      gsap.set([mainContainer, kemuriContainer], { opacity: 0 });
     });
     btn.addEventListener("click", () => {
       const sectionId = btn.getAttribute("data-section");

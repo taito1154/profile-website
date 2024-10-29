@@ -77,16 +77,15 @@ body {
 
   span {
     position: relative;
-    z-index: 2;
+    z-index: 3;
   }
-
+  .kemuri-video-container,
   .btn-video-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
     opacity: 0;
     transition: opacity $button-transition ease;
 
@@ -96,23 +95,25 @@ body {
       object-fit: cover;
     }
   }
-
-  &:hover,
-  &:focus {
-    background-color: $button-hover-color;
-    .btn-video-container {
-      opacity: 1;
-    }
-    transform: scale(1.05);
+  .smoke-video-container {
+    z-index: 2; // 煙の動画を通常の動画の上に配置
   }
-
-  &:active {
-    transform: scale(0.98);
+  .btn-video-container {
+    z-index: 1;
   }
+  // &:hover,
+  // &:focus {
+  //   background-color: $button-hover-color;
+  //   transform: scale(1.05);
+  // }
 
-  &:focus {
-    outline: none;
-  }
+  // &:active {
+  //   transform: scale(0.98);
+  // }
+
+  // &:focus {
+  //   outline: none;
+  // }
   // ボタンの位置を調整
   &:nth-child(1) {
     // About
