@@ -2,29 +2,18 @@ const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,
 };
-// function appData() {
-//   return {
-//     currentSection: "home",
-//     switchSection(section) {
-//       const oldSection = document.querySelector(`#${this.currentSection}`);
-//       const newSection = document.querySelector(`#${section}`);
 
-//       gsap.to(oldSection, {
-//         opacity: 0,
-//         y: 50,
-//         duration: PARAMS.animationSpeed,
-//         onComplete: () => {
-//           this.currentSection = section;
-//           gsap.fromTo(
-//             newSection,
-//             { opacity: 0, y: 50 },
-//             { opacity: 1, y: 0, duration: PARAMS.animationSpeed }
-//           );
-//         },
-//       });
-//     },
-//   };
-// }
+// ボタンのアニメーション関数を定義
+function animateButtons(bigBTNs) {
+  gsap.set(bigBTNs, { scale: 0.5, opacity: 0 }); // ボタンを初期状態にリセット
+  gsap.to(bigBTNs, {
+    scale: 1,
+    opacity: 1,
+    duration: 1,
+    ease: "back.out(1.7)",
+    stagger: 0.2,
+  });
+}
 
 // Initial animation
 document.addEventListener("DOMContentLoaded", () => {
@@ -50,6 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
+  homeLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    sections.style.display = "none";
+    bigButtons.style.display = "flex";
+    homeLink.classList.add("active");
+
+    // ボタンのアニメーションを再実行
+    animateButtons(bigBTNs);
+  });
   bigBTNs.forEach((btn) => {
     const video = btn.querySelector(".btn-video-container video");
     const kemuriVideo = btn.querySelector(".kemuri-video");
