@@ -5,6 +5,109 @@
   --fs-text: 12px;
 }
 
+.sections {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  top: calc(var(--pad) + 60px);
+  bottom: calc(var(--pad) + 40px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+.section {
+  padding: 20px;
+  background-color: transparent;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.contact-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f4f4f4;
+  border-radius: 10px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.contact-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.contact-form .form-group label {
+  font-weight: bold;
+  color: #333;
+}
+.contact-form .form-group input,
+.contact-form .form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #666;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #f4f4f4;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+.contact-form .form-group input:focus,
+.contact-form .form-group textarea:focus {
+  border-color: #333;
+  background-color: white;
+  outline: none;
+}
+.contact-form .form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+.contact-form .submit-btn {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  align-self: flex-start;
+}
+.contact-form .submit-btn:hover {
+  background-color: rgb(25.5, 25.5, 25.5);
+  transform: translateY(-2px);
+}
+.contact-form .submit-btn:active {
+  transform: translateY(0);
+}
+
+#form-status {
+  margin-top: 1rem;
+  font-weight: bold;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#form-status.show {
+  opacity: 1;
+}
+#form-status.success {
+  color: #28a745;
+}
+#form-status.error {
+  color: #dc3545;
+}
+
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
@@ -94,6 +197,39 @@ body {
 }
 
 @media (max-width: 768px) {
+  .sections {
+    padding: 10px;
+  }
+  .section,
+  .contact-section {
+    max-width: 90%;
+    padding: 15px;
+  }
+  .contact-form {
+    gap: 1rem;
+  }
+  .contact-form .form-group {
+    gap: 0.3rem;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    padding: 0.5rem;
+  }
+  .contact-form textarea {
+    min-height: 100px;
+  }
+  .contact-form .submit-btn {
+    padding: 0.5rem 1rem;
+  }
+  .main-header {
+    padding: 0 10px;
+  }
+  .main-header .logo h1 {
+    font-size: 1.2rem;
+  }
+  .main-header .main-nav ul li {
+    margin-left: 10px;
+  }
   .bigButtons {
     flex-direction: row;
     flex-wrap: wrap;
@@ -106,7 +242,55 @@ body {
   }
 }
 @media (max-width: 480px) {
-  .bigBTN {
+  footer {
+    font-size: 0.8rem;
+  }
+  :root {
+    --pad: 10px;
+  }
+  .sections {
+    padding: 5px;
+  }
+  .section,
+  .contact-section {
+    max-width: 100%;
+    padding: 10px;
+  }
+  .contact-form {
+    gap: 0.8rem;
+  }
+  .contact-form .form-group {
+    gap: 0.2rem;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    padding: 0.4rem;
+    font-size: 0.9rem;
+  }
+  .contact-form textarea {
+    min-height: 80px;
+  }
+  .contact-form .submit-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  .main-header {
+    height: auto;
+    flex-direction: column;
+    padding: 10px 0;
+  }
+  .main-header .logo h1 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+  }
+  .main-header .main-nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+  .main-header .main-nav ul li {
+    margin: 5px 0;
+  }
+  .main-header .bigBTN {
     width: calc(300px * 0.6);
     height: calc(300px * 0.6);
     font-size: calc(1.5rem * 0.6);
@@ -180,7 +364,7 @@ body {
 }
 
 .main-header {
-  background-color: white;
+  background-color: #333;
   position: fixed;
   top: var(--pad);
   left: var(--pad);
@@ -195,6 +379,7 @@ body {
 .main-header .logo h1 {
   margin: 0;
   font-size: 1.5rem;
+  color: white;
 }
 .main-header .main-nav ul {
   list-style-type: none;
@@ -208,7 +393,7 @@ body {
 }
 .main-header .main-nav ul li a {
   text-decoration: none;
-  color: #333;
+  color: white;
   font-weight: bold;
   transition: color 0.3s ease;
 }

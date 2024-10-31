@@ -21,7 +21,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const sections = document.querySelector(".sections");
   const bigBTNs = document.querySelectorAll(".bigBTN");
   const homeLink = document.querySelector('.main-nav a[href="#home"]');
+  const contactSection = document.querySelector(".section");
+  const contactForm = document.querySelector(".contact-form");
+  const formGroups = document.querySelectorAll(".form-group");
+  const submitBtn = document.querySelector(".submit-btn");
 
+  // コンタクトフォームのアニメーション関数
+  function animateContactForm() {
+    gsap.fromTo(
+      contactSection,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+    );
+
+    gsap.fromTo(
+      formGroups,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }
+    );
+
+    gsap.fromTo(
+      submitBtn,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, delay: 0.5, ease: "power2.out" }
+    );
+  }
+  // セクションのアニメーション関数を追加
+  function animateSection(section) {
+    gsap.fromTo(
+      section,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+    );
+  }
   // ボタンのアニメーション
   gsap.fromTo(
     bigBTNs,
@@ -92,13 +124,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     btn.addEventListener("click", () => {
       const sectionId = btn.getAttribute("data-section");
-      // ボタン達を非表示に
       bigButtons.style.display = "none";
       sections.style.display = "block";
-      // クリックしたセクションの表示
       document.querySelectorAll(".section").forEach((section) => {
         if (section.id === sectionId) {
           section.style.display = "block";
+          if (section.id === "contact") {
+            animateContactForm();
+            animateSection(section);
+          } else {
+            animateSection(section);
+          }
         } else {
           section.style.display = "none";
         }
@@ -106,6 +142,31 @@ document.addEventListener("DOMContentLoaded", () => {
       homeLink.classList.remove("active");
     });
   });
+  // コンタクトフォームの送信イベント
+  contactForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    gsap.to(formGroups, { opacity: 0, y: -20, duration: 0.3, stagger: 0.1 });
+    gsap.to(submitBtn, { opacity: 0, y: -20, duration: 0.3 });
+
+    const formStatus = document.getElementById("form-status");
+    formStatus.textContent =
+      "メッセージが送信されました。ありがとうございます！";
+    formStatus.classList.add("success", "show");
+    gsap.fromTo(
+      formStatus,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, delay: 0.5 }
+    );
+
+    setTimeout(() => {
+      contactForm.reset();
+      gsap.to(formGroups, { opacity: 1, y: 0, duration: 0.3, stagger: 0.1 });
+      gsap.to(submitBtn, { opacity: 1, y: 0, duration: 0.3 });
+      gsap.to(formStatus, { opacity: 0, duration: 0.3, delay: 2 });
+    }, 3000);
+  });
+
   // homeLinkを押すと
   homeLink.addEventListener("click", (e) => {
     e.preventDefault();
@@ -145,14 +206,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "power3.out",
     delay: PARAMS.introAnimationDuration * 0.5,
   });
-  gsap.from(".section", {
-    opacity: 0,
-    y: 50,
-    duration: 1,
-    ease: "power3.out",
-    stagger: 0.2,
-    delay: PARAMS.introAnimationDuration * 0.75,
-  });
+  // gsap.from(".section", {
+  //   opacity: 0,
+  //   y: 50,
+  //   duration: 1,
+  //   ease: "power3.out",
+  //   stagger: 0.2,
+  //   delay: PARAMS.introAnimationDuration * 0.75,
+  // });
   // フレームのアニメーション
   gsap.to(".frame-left, .frame-right", {
     scaleY: 1,

@@ -30,6 +30,119 @@ $button-transition: all 0.3s ease;
   justify-content: center;
   align-items: center;
 }
+// Contact Form Styles
+.sections {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  top: calc(var(--pad) + #{$header-height});
+  bottom: calc(var(--pad) + #{$footer-height});
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  box-sizing: border-box;
+}
+.section {
+  padding: 20px;
+  background-color: transparent; // 'white'から'transparent'に変更
+  border-radius: 5px;
+  width: 100%; // 幅を100%に設定
+  max-width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  // overflow-y: auto;
+}
+.contact-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: $background-color;
+  border-radius: 10px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: bold;
+      color: $primary-color;
+    }
+
+    input,
+    textarea {
+      padding: 0.75rem;
+      border: 1px solid $secondary-color;
+      border-radius: 4px;
+      font-size: 1rem;
+      background-color: $background-color;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+
+      &:focus {
+        border-color: $primary-color;
+        background-color: white;
+        outline: none;
+      }
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+  }
+
+  .submit-btn {
+    background-color: $button-color;
+    color: $button-text-color;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    align-self: flex-start;
+
+    &:hover {
+      background-color: $button-hover-color;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+#form-status {
+  margin-top: 1rem;
+  font-weight: bold;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &.show {
+    opacity: 1;
+  }
+
+  &.success {
+    color: #28a745;
+  }
+
+  &.error {
+    color: #dc3545;
+  }
+}
+
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
@@ -101,19 +214,6 @@ body {
   .btn-video-container {
     z-index: 1;
   }
-  // &:hover,
-  // &:focus {
-  //   background-color: $button-hover-color;
-  //   transform: scale(1.05);
-  // }
-
-  // &:active {
-  //   transform: scale(0.98);
-  // }
-
-  // &:focus {
-  //   outline: none;
-  // }
   // ボタンの位置を調整
   &:nth-child(1) {
     // About
@@ -143,6 +243,47 @@ body {
 }
 
 @media (max-width: 768px) {
+  .sections {
+    padding: 10px;
+  }
+
+  .section,
+  .contact-section {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  .contact-form {
+    gap: 1rem;
+
+    .form-group {
+      gap: 0.3rem;
+    }
+
+    input,
+    textarea {
+      padding: 0.5rem;
+    }
+
+    textarea {
+      min-height: 100px;
+    }
+
+    .submit-btn {
+      padding: 0.5rem 1rem;
+    }
+  }
+  .main-header {
+    padding: 0 10px;
+
+    .logo h1 {
+      font-size: 1.2rem;
+    }
+
+    .main-nav ul li {
+      margin-left: 10px;
+    }
+  }
   .bigButtons {
     flex-direction: row;
     flex-wrap: wrap;
@@ -157,10 +298,69 @@ body {
 }
 
 @media (max-width: 480px) {
-  .bigBTN {
-    width: calc(#{$button-size} * 0.6);
-    height: calc(#{$button-size} * 0.6);
-    font-size: calc(#{$button-font-size} * 0.6);
+  footer {
+    font-size: 0.8rem;
+  }
+  :root {
+    --pad: 10px;
+  }
+
+  .sections {
+    padding: 5px;
+  }
+
+  .section,
+  .contact-section {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .contact-form {
+    gap: 0.8rem;
+
+    .form-group {
+      gap: 0.2rem;
+    }
+
+    input,
+    textarea {
+      padding: 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    textarea {
+      min-height: 80px;
+    }
+
+    .submit-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .main-header {
+    height: auto;
+    flex-direction: column;
+    padding: 10px 0;
+
+    .logo h1 {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .main-nav ul {
+      flex-direction: column;
+      align-items: center;
+
+      li {
+        margin: 5px 0;
+      }
+    }
+    .bigBTN {
+      width: calc(#{$button-size} * 0.6);
+      height: calc(#{$button-size} * 0.6);
+      font-size: calc(#{$button-font-size} * 0.6);
+    }
   }
 }
 .video-container {
@@ -228,7 +428,7 @@ body {
 }
 
 .main-header {
-  background-color: white;
+  background-color: $primary-color;
   position: fixed;
   top: var(--pad); // フレームの内側に配置
   left: var(--pad); // フレームの内側に配置
@@ -242,6 +442,7 @@ body {
     h1 {
       margin: 0;
       font-size: 1.5rem;
+      color: white;
     }
   }
 
@@ -256,7 +457,7 @@ body {
 
         a {
           text-decoration: none;
-          color: $primary-color;
+          color: white;
           font-weight: bold;
           transition: color 0.3s ease;
 
