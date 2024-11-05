@@ -95,10 +95,15 @@
         <h2>Work</h2>
         <p>Check out my portfolio and projects.</p>
       </section>
-      <section id="contact" class="section">
+      <section id="contact" class="section contact-section">
         <h2>Contact</h2>
         <p>振り付け、バックダンサーなどのご依頼はこちらから。</p>
-        <form id="contact-form" class="contact-form">
+        <form
+          id="contact-form"
+          class="contact-form"
+          action="send_email.php"
+          method="POST"
+        >
           <div class="form-group">
             <label for="name">お名前</label>
             <input type="text" id="name" name="name" required />

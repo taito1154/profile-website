@@ -39,117 +39,88 @@ $button-transition: all 0.3s ease;
   bottom: calc(var(--pad) + #{$footer-height});
   display: flex;
   justify-content: center;
-  align-items: center;
-  overflow: auto;
+  align-items: flex-start;
+  // overflow: auto;
   box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none; // Firefox用
+  -ms-overflow-style: none; // IE/Edge用
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome/Safari/Opera用
+  }
 }
 .section {
-  padding: 20px;
-  background-color: transparent; // 'white'から'transparent'に変更
-  border-radius: 5px;
-  width: 100%; // 幅を100%に設定
-  max-width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  // overflow-y: auto;
 }
 .contact-section {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem;
-  background-color: $background-color;
-  border-radius: 10px;
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-
-  .form-group {
+  background-color: white; // 背景色を設定
+  margin: 0 auto; // 中央揃え
+  padding: 2rem; // パディングを設定
+  border-radius: 10px; // 角を丸くする
+  .contact-form {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1.5rem;
 
-    label {
-      font-weight: bold;
-      color: $primary-color;
-    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
 
-    input,
-    textarea {
-      padding: 0.75rem;
-      border: 1px solid $secondary-color;
-      border-radius: 4px;
-      font-size: 1rem;
-      background-color: $background-color;
-      transition: border-color 0.3s ease, background-color 0.3s ease;
+      label {
+        font-weight: bold;
+        color: $primary-color;
+      }
 
-      &:focus {
-        border-color: $primary-color;
-        background-color: white;
-        outline: none;
+      input,
+      textarea {
+        padding: 0.75rem;
+        border: 1px solid $secondary-color;
+        border-radius: 4px;
+        font-size: 1rem;
+        background-color: $background-color;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+
+        &:focus {
+          border-color: $primary-color;
+          background-color: white;
+          outline: none;
+        }
+      }
+
+      textarea {
+        min-height: 150px;
+        resize: vertical;
       }
     }
 
-    textarea {
-      min-height: 150px;
-      resize: vertical;
+    .submit-btn {
+      background-color: $button-color;
+      color: $button-text-color;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      align-self: flex-start;
+
+      &:hover {
+        background-color: $button-hover-color;
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
     }
-  }
-
-  .submit-btn {
-    background-color: $button-color;
-    color: $button-text-color;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    align-self: flex-start;
-
-    &:hover {
-      background-color: $button-hover-color;
-      transform: translateY(-2px);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
-}
-
-#form-status {
-  margin-top: 1rem;
-  font-weight: bold;
-  text-align: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-
-  &.show {
-    opacity: 1;
-  }
-
-  &.success {
-    color: #28a745;
-  }
-
-  &.error {
-    color: #dc3545;
   }
 }
 
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
-  color: $primary-color;
-  background-color: $background-color;
-  margin: 0;
-  padding: var(--pad);
 }
 .main-content {
   display: flex;

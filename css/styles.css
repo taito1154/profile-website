@@ -13,47 +13,38 @@
   bottom: calc(var(--pad) + 40px);
   display: flex;
   justify-content: center;
-  align-items: center;
-  overflow: auto;
+  align-items: flex-start;
   box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
-.section {
-  padding: 20px;
-  background-color: transparent;
-  border-radius: 5px;
-  width: 100%;
-  max-width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
+.sections::-webkit-scrollbar {
+  display: none;
 }
 
 .contact-section {
-  max-width: 1000px;
+  background-color: white;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #f4f4f4;
   border-radius: 10px;
 }
-
-.contact-form {
+.contact-section .contact-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-.contact-form .form-group {
+.contact-section .contact-form .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-.contact-form .form-group label {
+.contact-section .contact-form .form-group label {
   font-weight: bold;
   color: #333;
 }
-.contact-form .form-group input,
-.contact-form .form-group textarea {
+.contact-section .contact-form .form-group input,
+.contact-section .contact-form .form-group textarea {
   padding: 0.75rem;
   border: 1px solid #666;
   border-radius: 4px;
@@ -61,17 +52,17 @@
   background-color: #f4f4f4;
   transition: border-color 0.3s ease, background-color 0.3s ease;
 }
-.contact-form .form-group input:focus,
-.contact-form .form-group textarea:focus {
+.contact-section .contact-form .form-group input:focus,
+.contact-section .contact-form .form-group textarea:focus {
   border-color: #333;
   background-color: white;
   outline: none;
 }
-.contact-form .form-group textarea {
+.contact-section .contact-form .form-group textarea {
   min-height: 150px;
   resize: vertical;
 }
-.contact-form .submit-btn {
+.contact-section .contact-form .submit-btn {
   background-color: #333;
   color: white;
   border: none;
@@ -83,38 +74,17 @@
   transition: background-color 0.3s ease, transform 0.2s ease;
   align-self: flex-start;
 }
-.contact-form .submit-btn:hover {
+.contact-section .contact-form .submit-btn:hover {
   background-color: rgb(25.5, 25.5, 25.5);
   transform: translateY(-2px);
 }
-.contact-form .submit-btn:active {
+.contact-section .contact-form .submit-btn:active {
   transform: translateY(0);
-}
-
-#form-status {
-  margin-top: 1rem;
-  font-weight: bold;
-  text-align: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-#form-status.show {
-  opacity: 1;
-}
-#form-status.success {
-  color: #28a745;
-}
-#form-status.error {
-  color: #dc3545;
 }
 
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
-  color: #333;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: var(--pad);
 }
 
 .main-content {
