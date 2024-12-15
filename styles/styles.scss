@@ -1,0 +1,472 @@
+// 変数
+$primary-color: #333;
+$secondary-color: #666;
+$background-color: #f4f4f4;
+$header-height: 60px;
+$footer-height: 40px;
+$bg-lightness: 90%;
+$text-lightness: 10%;
+$base-padding: 20px;
+$min-viewport-padding: 4vmin;
+$base-font-size: 12px;
+$full-width: 100vw;
+$full-height: 100vh;
+$button-size: 300px;
+$button-color: $primary-color;
+$button-hover-color: darken($primary-color, 10%);
+$button-text-color: white;
+$button-font-size: 1.5rem;
+$button-transition: all 0.3s ease;
+
+:root {
+  --c-bg: hsl(0, 0%, #{$bg-lightness});
+  --c-text: hsl(0, 0%, #{$text-lightness});
+  --pad: max(#{$base-padding}, #{$min-viewport-padding});
+  --fs-text: #{$base-font-size};
+}
+// ミックスイン
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+// Contact Form Styles
+.sections {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  top: calc(var(--pad) + #{$header-height});
+  bottom: calc(var(--pad) + #{$footer-height});
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  // overflow: auto;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none; // Firefox用
+  -ms-overflow-style: none; // IE/Edge用
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome/Safari/Opera用
+  }
+}
+.section {
+}
+.contact-section {
+  background-color: white; // 背景色を設定
+  margin: 0 auto; // 中央揃え
+  padding: 2rem; // パディングを設定
+  border-radius: 10px; // 角を丸くする
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      label {
+        font-weight: bold;
+        color: $primary-color;
+      }
+
+      input,
+      textarea {
+        padding: 0.75rem;
+        border: 1px solid $secondary-color;
+        border-radius: 4px;
+        font-size: 1rem;
+        background-color: $background-color;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+
+        &:focus {
+          border-color: $primary-color;
+          background-color: white;
+          outline: none;
+        }
+      }
+
+      textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+    }
+
+    .submit-btn {
+      background-color: $button-color;
+      color: $button-text-color;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      align-self: flex-start;
+
+      &:hover {
+        background-color: $button-hover-color;
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh-#{$header-height});
+  padding-top: calc(#{$header-height} + var(--pad));
+  box-sizing: border-box;
+}
+.bigButtons {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  top: calc(var(--pad) + #{$header-height});
+  bottom: calc(var(--pad) + #{$footer-height});
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bigBTN {
+  width: $button-size;
+  height: $button-size;
+  border-radius: 50%;
+  background-color: $button-color;
+  color: $button-text-color;
+  border: none;
+  cursor: pointer;
+  font-size: $button-font-size;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: $button-transition;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+
+  span {
+    position: relative;
+    z-index: 3;
+  }
+  .kemuri-video-container,
+  .btn-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity $button-transition ease;
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  .smoke-video-container {
+    z-index: 2; // 煙の動画を通常の動画の上に配置
+  }
+  .btn-video-container {
+    z-index: 1;
+  }
+  // ボタンの位置を調整
+  &:nth-child(1) {
+    // About
+    position: absolute;
+    top: 10%; // 上部中央
+    // left: 50%;
+    // transform: translateX(-50%);
+  }
+
+  &:nth-child(2) {
+    // Work
+    position: absolute;
+    bottom: 10%; // 下部に配置
+    right: 10%; // 右側に配置
+    // top: 100%;
+    // transform: translate(-50%, 50%);
+  }
+
+  &:nth-child(3) {
+    // Contact
+    position: absolute;
+    bottom: 10%; // 下部右
+    left: 10%;
+
+    // transform: translate(50%, 50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .sections {
+    padding: 10px;
+  }
+
+  .section,
+  .contact-section {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  .contact-form {
+    gap: 1rem;
+
+    .form-group {
+      gap: 0.3rem;
+    }
+
+    input,
+    textarea {
+      padding: 0.5rem;
+    }
+
+    textarea {
+      min-height: 100px;
+    }
+
+    .submit-btn {
+      padding: 0.5rem 1rem;
+    }
+  }
+  .main-header {
+    padding: 0 10px;
+
+    .logo h1 {
+      font-size: 1.2rem;
+    }
+
+    .main-nav ul li {
+      margin-left: 10px;
+    }
+  }
+  .bigButtons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bigBTN {
+    width: calc(#{$button-size} * 0.8);
+    height: calc(#{$button-size} * 0.8);
+    font-size: calc(#{$button-font-size} * 0.8);
+  }
+}
+
+@media (max-width: 480px) {
+  footer {
+    font-size: 0.8rem;
+  }
+  :root {
+    --pad: 10px;
+  }
+
+  .sections {
+    padding: 5px;
+  }
+
+  .section,
+  .contact-section {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .contact-form {
+    gap: 0.8rem;
+
+    .form-group {
+      gap: 0.2rem;
+    }
+
+    input,
+    textarea {
+      padding: 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    textarea {
+      min-height: 80px;
+    }
+
+    .submit-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .main-header {
+    height: auto;
+    flex-direction: column;
+    padding: 10px 0;
+
+    .logo h1 {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .main-nav ul {
+      flex-direction: column;
+      align-items: center;
+
+      li {
+        margin: 5px 0;
+      }
+    }
+    .bigBTN {
+      width: calc(#{$button-size} * 0.6);
+      height: calc(#{$button-size} * 0.6);
+      font-size: calc(#{$button-font-size} * 0.6);
+    }
+  }
+}
+.video-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+
+  video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover; // 動画をコンテナにフィットさせる
+  }
+}
+.frame {
+  position: fixed;
+  left: var(--pad);
+  right: var(--pad);
+  top: var(--pad);
+  bottom: var(--pad);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.frame_line {
+  transform-origin: center;
+  position: absolute;
+  background-color: white;
+  opacity: 0;
+}
+
+.frame-left {
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+.frame-right {
+  right: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+.frame-top {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+}
+.frame-bottom {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+}
+
+.main-header {
+  background-color: $primary-color;
+  position: fixed;
+  top: var(--pad); // フレームの内側に配置
+  left: var(--pad); // フレームの内側に配置
+  right: var(--pad); // フレームの内側に配置
+  height: $header-height;
+  @include flex-center;
+  justify-content: space-between;
+  padding: 0 20px;
+
+  .logo {
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: white;
+    }
+  }
+
+  .main-nav {
+    ul {
+      list-style-type: none;
+      padding: 0;
+      @include flex-center;
+
+      li {
+        margin-left: 20px;
+
+        a {
+          text-decoration: none;
+          color: white;
+          font-weight: bold;
+          transition: color 0.3s ease;
+
+          &:hover,
+          &.active {
+            color: $secondary-color;
+          }
+        }
+      }
+    }
+  }
+}
+
+main {
+  padding-top: calc(
+    #{$header-height} + var(--pad) + 20px
+  ); // ヘッダーの高さとフレームのパディングを考慮
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section {
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+footer {
+  position: fixed;
+  bottom: var(--pad);
+  left: var(--pad);
+  right: var(--pad);
+  padding: 5px;
+  background-color: $primary-color;
+  color: white;
+  height: $footer-height;
+  display: flex;
+  align-items: center; // 垂直方向の中央揃え
+  justify-content: center; // 水平方向の中央揃え
+}
