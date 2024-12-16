@@ -14,13 +14,21 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  box-sizing: border-box;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .sections::-webkit-scrollbar {
   display: none;
+}
+
+.section {
+  background-color: white;
+}
+
+.work-section {
+  margin: 0%;
+  padding: 10px;
 }
 
 .contact-section {
@@ -167,9 +175,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  .sections {
-    padding: 10px;
-  }
   .section,
   .contact-section {
     max-width: 90%;
@@ -369,19 +374,6 @@ body {
 }
 .main-header .main-nav ul li a:hover, .main-header .main-nav ul li a.active {
   color: #666;
-}
-
-main {
-  padding-top: calc(60px + var(--pad) + 20px);
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.section {
-  padding: 20px;
-  background-color: white;
-  border-radius: 5px;
-  margin-bottom: 20px;
 }
 
 footer {
