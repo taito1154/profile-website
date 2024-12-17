@@ -1,3 +1,17 @@
+// import * as THREE from "three";
+
+// const scene = new THREE.Scene();
+// const camera = new THREE.PerspectiveCamera(
+//   75,
+//   innerWidth / innerHeight,
+//   0.1,
+//   1000
+// );
+// constrerender = new WebGLRerender();
+// console.log(scene);
+// console.log(camera);
+// console.log(rerender);
+
 const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,

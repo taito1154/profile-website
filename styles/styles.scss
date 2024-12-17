@@ -40,8 +40,6 @@ $button-transition: all 0.3s ease;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  // overflow: auto;
-  box-sizing: border-box;
   overflow-y: auto;
   scrollbar-width: none; // Firefox用
   -ms-overflow-style: none; // IE/Edge用
@@ -51,6 +49,11 @@ $button-transition: all 0.3s ease;
   }
 }
 .section {
+  background-color: white;
+}
+.work-section {
+  margin: 0%;
+  padding: 10px;
 }
 .contact-section {
   background-color: white; // 背景色を設定
@@ -215,7 +218,6 @@ body {
 
 @media (max-width: 768px) {
   .sections {
-    padding: 10px;
   }
 
   .section,
@@ -440,21 +442,6 @@ body {
       }
     }
   }
-}
-
-main {
-  padding-top: calc(
-    #{$header-height} + var(--pad) + 20px
-  ); // ヘッダーの高さとフレームのパディングを考慮
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.section {
-  padding: 20px;
-  background-color: white;
-  border-radius: 5px;
-  margin-bottom: 20px;
 }
 
 footer {
