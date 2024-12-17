@@ -45,7 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
   renderer.setSize(innerWidth, innerHeight);
 
   renderer.setPixelRatio(devicePixelRatio);
-  document.body.appendChild(renderer.domElement);
+
+  // .boxes要素にThree.jsのキャンバスを追加
+  const boxesContainer = document.querySelector(".boxes");
+  boxesContainer.appendChild(renderer.domElement);
+
+  // レンダラーのサイズを、.boxesのサイズに合わせる
+  function resizeRenderer() {
+    const width = boxesContainer.clientWidth;
+    const height = boxesContainer.clientHeight;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  }
+  // ウィンドウのリサイズ時にレンダラーをリサイズ
+  window.addEventListener("resize", resizeRenderer);
+
+  // document.body.appendChild(renderer.domElement);
   const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
   const materials = [
     new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
@@ -76,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     renderer.render(scene, camera); // シーンをレンダリング
   }
+  resizeRenderer(); // 初回リサイズ
   animate();
   // Raycasterとマウスベクトルの設定
   const raycaster = new THREE.Raycaster();
