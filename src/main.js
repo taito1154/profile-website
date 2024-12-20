@@ -1,24 +1,9 @@
 import * as THREE from "../node_modules/three/build/three.module.js";
 
-// import { color } from "three/tsl";
-
 const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,
 };
-
-// ボタンのアニメーション関数を定義
-// function animateButtons(bigBTNs) {
-//   gsap.set(bigBTNs, { scale: 0.5, opacity: 0 }); // ボタンを初期状態にリセット
-//   gsap.to(bigBTNs, {
-//     scale: 1,
-//     opacity: 1,
-//     duration: 1,
-//     ease: "back.out(1.7)",
-//     stagger: 0.2,
-//   });
-// }
-
 // Initial animation
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Script loaded");
@@ -38,12 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     1000
   );
   const renderer = new THREE.WebGLRenderer();
-  console.log(scene);
-  console.log(camera);
-  console.log(renderer);
-
+  renderer.setClearColor(0x000000, 0); // 完全に透明な背景
   renderer.setSize(innerWidth, innerHeight);
-
   renderer.setPixelRatio(devicePixelRatio);
 
   // .boxes要素にThree.jsのキャンバスを追加
@@ -61,24 +42,96 @@ document.addEventListener("DOMContentLoaded", () => {
   // ウィンドウのリサイズ時にレンダラーをリサイズ
   window.addEventListener("resize", resizeRenderer);
 
+  function onMouseMove(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(boxes);
+
+    boxes.forEach((box, index) => {
+      if (intersects.length > 0 && intersects[0].object === box) {
+        box.material.map = videoTextures[index];
+        // box.material.color.setHex(0xffffff);
+      } else {
+        box.material.map = null;
+      }
+      box.material.needsUpdate = true;
+    });
+  }
+  window.addEventListener("mousemove", onMouseMove, false);
   // document.body.appendChild(renderer.domElement);
-  const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-  const materials = [
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+  // 環境光を追加
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  // 平行光源を追加
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(5, 5, 5);
+  scene.add(directionalLight);
+
+  const boxGeometry = new THREE.BoxGeometry(1.3, 1.3, 1.3);
+  // 動画テクスチャを作成する関数
+  function createVideoTexture(src) {
+    const video = document.createElement("video");
+    video.src = src;
+    video.loop = true;
+    video.muted = true;
+    // video.autoplay = true; // 自動再生を設定
+    video.play();
+    const texture = new THREE.VideoTexture(video);
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+
+    video.addEventListener("loadedmetadata", () => {
+      const aspectRatio = video.videoWidth / video.videoHeight;
+      if (aspectRatio > 1) {
+        texture.repeat.set(1, 1 / aspectRatio);
+        texture.offset.set(0, (1 - 1 / aspectRatio) / 2);
+      } else {
+        texture.repeat.set(aspectRatio, 1);
+        texture.offset.set((1 - aspectRatio) / 2, 0);
+      }
+    });
+
+    return texture;
+    // return new THREE.VideoTexture(video);
+  }
+  const videoTextures = [
+    createVideoTexture("video/about-Shungo-video.mp4"),
+    createVideoTexture("video/contact-Shungo-video.mp4"),
+    createVideoTexture("video/work-Shungo-video.mp4"),
+    // createVideoTexture("video/contact-Shungo-video.mp4"),
+    // createVideoTexture("video/contact-Shungo-video.mp4"),
+    // createVideoTexture("video/contact-Shungo-video.mp4"),
   ];
+  const materials = videoTextures.map(
+    () =>
+      new THREE.MeshPhongMaterial({
+        color: 0xffffff, // 通常は白色
+        // map: texture,
+        transparent: true,
+        opacity: 1,
+        // color: 0x000000, // 黒色
+      })
+  );
+  // const materials = [
+  //   new THREE.MeshPhongMaterial({ color: 0xffffff }),
+  //   new THREE.MeshPhongMaterial({ color: 0xff0000 }),
+  //   new THREE.MeshPhongMaterial({ color: 0x0000ff }),
+  // ];
+  const sectionIds = ["about", "work", "contact"];
   const boxes = materials.map((material, index) => {
-    const box = new THREE.Mesh(boxGeometry, material);
+    const box = new THREE.Mesh(boxGeometry, materials[index]);
     // 各ボックスの位置を設定
     if (index === 0) {
       box.position.set(0, 1, 2); // ボックス1: 上部中央
     } else if (index === 1) {
-      box.position.set(0, -1, 2); // ボックス2: 下部中央
+      box.position.set(2, -1, 2); // ボックス2: 下部中央
     } else if (index === 2) {
       box.position.set(-2, -1, 2); // ボックス3: 左下
     }
 
+    box.userData.sectionId = sectionIds[index]; // セクションIDを設定
     scene.add(box);
     return box;
   });
@@ -92,11 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     renderer.render(scene, camera); // シーンをレンダリング
   }
-  resizeRenderer(); // 初回リサイズ
-  animate();
   // Raycasterとマウスベクトルの設定
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+  resizeRenderer(); // 初回リサイズ
+  animate();
 
   // ボックスへのクリックイベント追加
   window.addEventListener("click", (event) => {
@@ -109,9 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ボックスとの交差判定
     const intersects = raycaster.intersectObjects(boxes);
-
     if (intersects.length > 0) {
-      const clickedBox = intersects[0].object; // 最初に交差したボックスを取得
+      const clickedBox = intersects[0].object;
+      const sectionId = clickedBox.userData.sectionId;
 
       // GSAPでアニメーション（例：スケールアップ）
       gsap.to(clickedBox.scale, {
@@ -124,13 +177,19 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // 他のアクション（セクション表示など）もここで追加可能
-      console.log(
-        `Clicked on box with color: ${clickedBox.material.color.getHexString()}`
-      );
+      console.log(`Clicked on box for section: ${sectionId}`);
 
       // セクション表示ロジックなどもここに追加できます
       const sections = document.querySelector(".sections");
       sections.style.display = "block"; // セクションを表示する例
+      document.querySelectorAll(".section").forEach((section) => {
+        if (section.id === sectionId) {
+          section.style.display = "block";
+          animateSection(section);
+        } else {
+          section.style.display = "none";
+        }
+      });
     }
   });
 
@@ -162,94 +221,13 @@ document.addEventListener("DOMContentLoaded", () => {
       { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
     );
   }
-  // ボタンのアニメーション
-  // gsap.fromTo(
-  //   bigBTNs,
-  //   {
-  //     scale: 0.5,
-  //     opacity: 0,
-  //   },
-  //   {
-  //     scale: 1,
-  //     opacity: 1,
-  //     duration: 1,
-  //     ease: "back.out(1.7)",
-  //     stagger: 0.2,
-  //     delay: PARAMS.introAnimationDuration * 0.5,
-  //   }
-  // );
 
   homeLink.addEventListener("click", (e) => {
     e.preventDefault();
     sections.style.display = "none";
     bigButtons.style.display = "flex";
     homeLink.classList.add("active");
-
-    // ボタンのアニメーションを再実行
-    animateButtons(bigBTNs);
   });
-  // bigBTNs.forEach((btn) => {
-  //   const video = btn.querySelector(".btn-video-container video");
-  //   const kemuriVideo = btn.querySelector(".kemuri-video");
-  //   const kemuriContainer = btn.querySelector(".kemuri-video-container");
-  //   const mainContainer = btn.querySelector(".btn-video-container");
-  //   let kemuriAnimation;
-  //   let mainAnimation;
-
-  //   // 煙の動画を常に再生
-  //   kemuriVideo.play().catch((error) => {
-  //     console.error("Smoke video playback failed:", error);
-  //   });
-  //   // 動画を自動再生（ミュート状態で）
-  //   video.play().catch((error) => {
-  //     console.error("Video playback failed:", error);
-  //   });
-  //   btn.addEventListener("mouseenter", () => {
-  //     // 既存のアニメーションを中止
-  //     if (kemuriAnimation) kemuriAnimation.kill();
-  //     if (mainAnimation) mainAnimation.kill();
-  //     btn.style.transform = "scale(1.2)";
-  //     kemuriAnimation = gsap.to(kemuriContainer, {
-  //       opacity: 1,
-  //       duration: 2,
-  //       ease: "power2.out",
-  //     });
-  //     mainAnimation = gsap.to(mainContainer, {
-  //       opacity: 1,
-  //       duration: 2,
-  //       delay: 1,
-  //       ease: "power2.out",
-  //     });
-  //   });
-  //   btn.addEventListener("mouseleave", () => {
-  //     // 既存のアニメーションを中止
-  //     if (kemuriAnimation) kemuriAnimation.kill();
-  //     if (mainAnimation) mainAnimation.kill();
-  //     btn.style.transform = "scale(1)";
-
-  //     // 即座に不透明度を0に設定
-  //     gsap.set([mainContainer, kemuriContainer], { opacity: 0 });
-  //   });
-  //   btn.addEventListener("click", () => {
-  //     const sectionId = btn.getAttribute("data-section");
-  //     bigButtons.style.display = "none";
-  //     sections.style.display = "block";
-  //     document.querySelectorAll(".section").forEach((section) => {
-  //       if (section.id === sectionId) {
-  //         section.style.display = "block";
-  //         if (section.id === "contact") {
-  //           animateContactForm();
-  //           animateSection(section);
-  //         } else {
-  //           animateSection(section);
-  //         }
-  //       } else {
-  //         section.style.display = "none";
-  //       }
-  //     });
-  //     homeLink.classList.remove("active");
-  //   });
-  // });
   // コンタクトフォームの送信イベント
   contactForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -314,14 +292,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "power3.out",
     delay: PARAMS.introAnimationDuration * 0.5,
   });
-  // gsap.from(".section", {
-  //   opacity: 0,
-  //   y: 50,
-  //   duration: 1,
-  //   ease: "power3.out",
-  //   stagger: 0.2,
-  //   delay: PARAMS.introAnimationDuration * 0.75,
-  // });
+  gsap.from(".section", {
+    opacity: 0,
+    y: 50,
+    duration: 1,
+    ease: "power3.out",
+    stagger: 0.2,
+    delay: PARAMS.introAnimationDuration * 0.75,
+  });
   // フレームのアニメーション
   gsap.to(".frame-left, .frame-right", {
     scaleY: 1,
