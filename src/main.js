@@ -52,10 +52,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (intersects.length > 0 && intersects[0].object === box) {
         box.material.map = videoTextures[index];
         // box.material.color.setHex(0xffffff);
+        box.material.needsUpdate = true;
+        playVideoSequence(index);
       } else {
-        box.material.map = null;
+        // box.material.map = null;
+        // 動画を外す（元の白に戻す）
+        if (box.material.map !== null) {
+          box.material.map = null;
+          box.material.needsUpdate = true;
+        }
       }
-      box.material.needsUpdate = true;
+      // box.material.needsUpdate = true;
     });
   }
   window.addEventListener("mousemove", onMouseMove, false);
@@ -97,23 +104,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // return new THREE.VideoTexture(video);
   }
   const videoTextures = [
+    createVideoTexture("video/kemuri.mp4"),
+    createVideoTexture("video/kemuri.mp4"),
+    createVideoTexture("video/kemuri.mp4"),
     createVideoTexture("video/about-Shungo-video.mp4"),
     createVideoTexture("video/contact-Shungo-video.mp4"),
     createVideoTexture("video/work-Shungo-video.mp4"),
-    // createVideoTexture("video/contact-Shungo-video.mp4"),
-    // createVideoTexture("video/contact-Shungo-video.mp4"),
-    // createVideoTexture("video/contact-Shungo-video.mp4"),
   ];
-  const materials = videoTextures.map(
-    () =>
-      new THREE.MeshPhongMaterial({
-        color: 0xffffff, // 通常は白色
-        // map: texture,
-        transparent: true,
-        opacity: 1,
-        // color: 0x000000, // 黒色
-      })
-  );
+  const materials = videoTextures
+    .slice(0, 3) // videoTextures 配列の最初の3つを取得
+    .map(
+      () =>
+        new THREE.MeshPhongMaterial({
+          color: 0xffffff, // 通常は白色
+          // map: texture,
+          transparent: true,
+          opacity: 1,
+          // color: 0x000000, // 黒色
+        })
+    );
   // const materials = [
   //   new THREE.MeshPhongMaterial({ color: 0xffffff }),
   //   new THREE.MeshPhongMaterial({ color: 0xff0000 }),
@@ -150,6 +159,41 @@ document.addEventListener("DOMContentLoaded", () => {
   const mouse = new THREE.Vector2();
   resizeRenderer(); // 初回リサイズ
   animate();
+
+  function playVideoSequence(index) {
+    const videoTexture = videoTextures[index];
+    const video = videoTexture?.image; // VideoTexture の video 要素を取得
+    if (!video) return;
+    // 現在の動画を再生
+    video.currentTime = 0; // 再生位置をリセット
+    video.loop = false; // 最初の動画は通常再生
+    video.play();
+
+    // 数秒後にフェードアウトと次の動画再生を実行
+    setTimeout(() => {
+      gsap.to(boxes[index].material, {
+        opacity: 0,
+        duration: 1, // フェードアウト時間
+        onComplete: () => {
+          // 次の動画を再生（ループまたは順次再生）
+          const nextIndex = index + 3;
+          const nextVideoTexture = videoTextures[nextIndex];
+          const nextVideo = nextVideoTexture?.image;
+          if (nextVideo) {
+            nextVideo.currentTime = 0; // 再生位置をリセット
+            nextVideo.loop = true; // 次の動画はループ再生
+            nextVideo.play();
+            // 次のボックスにテクスチャを適用し、フェードイン
+            boxes[index].material.map = nextVideoTexture; // 次のテクスチャを適用
+            gsap.to(boxes[index].material, {
+              opacity: 1,
+              duration: 1, // フェードイン時間
+            });
+          }
+        },
+      });
+    }); // 3秒後にフェードアウト
+  }
 
   // ボックスへのクリックイベント追加
   window.addEventListener("click", (event) => {
