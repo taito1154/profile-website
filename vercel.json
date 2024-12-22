@@ -1,11 +1,11 @@
 {
   "builds": [
     {
-      "src": "public/bundle.js",
+      "src": "/public/bundle.js",
       "use": "@vercel/static"
     },
     {
-      "src": "index.html",
+      "src": "/index.html",
       "use": "@vercel/static"
     }
   ],
