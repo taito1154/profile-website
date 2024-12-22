@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       gsap.to(boxes[index].material, {
         opacity: 0,
-        duration: 1, // フェードアウト時間
+        duration: 3, // フェードアウト時間
         onComplete: () => {
           // 次の動画を再生（ループまたは順次再生）
           const nextIndex = index + 3;
@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
             boxes[index].material.map = nextVideoTexture; // 次のテクスチャを適用
             gsap.to(boxes[index].material, {
               opacity: 1,
-              duration: 1, // フェードイン時間
+              duration: 2, // フェードイン時間
             });
           }
         },
