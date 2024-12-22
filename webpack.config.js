@@ -24,10 +24,10 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
-  output: {
-    filename: "bundle.js",
-    path: path.resolve(__dirname, "public"),
-  },
+  // output: {
+  //   filename: "main.js", // 出力ファイル名を main.js に指定
+  //   path: path.resolve(__dirname, "public"), // 出力先ディレクトリ
+  // },
   devServer: {
     static: {
       directory: path.join(__dirname, "/"),
