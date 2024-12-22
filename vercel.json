@@ -9,10 +9,9 @@
       "use": "@vercel/static"
     }
   ],
-  "public": "public",
   "routes": [
     {
-      "src": "/main.js",
+      "src": "/bundle.js",
       "dest": "/src/main.js"
     },
     {
