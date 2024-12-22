@@ -104,12 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // return new THREE.VideoTexture(video);
   }
   const videoTextures = [
-    createVideoTexture("video/kemuri.mp4"),
-    createVideoTexture("video/kemuri.mp4"),
-    createVideoTexture("video/kemuri.mp4"),
-    createVideoTexture("video/about-Shungo-video.mp4"),
-    createVideoTexture("video/contact-Shungo-video.mp4"),
-    createVideoTexture("video/work-Shungo-video.mp4"),
+    createVideoTexture("public/video/kemuri.mp4"),
+    createVideoTexture("public/video/kemuri.mp4"),
+    createVideoTexture("public/video/kemuri.mp4"),
+    createVideoTexture("public/video/about-Shungo-video.mp4"),
+    createVideoTexture("public/video/contact-Shungo-video.mp4"),
+    createVideoTexture("public/video/work-Shungo-video.mp4"),
   ];
   const materials = videoTextures
     .slice(0, 3) // videoTextures 配列の最初の3つを取得
