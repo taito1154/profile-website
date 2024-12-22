@@ -1,9 +1,12 @@
 {
   "builds": [
     {
-      "src": "src/index.ts",
+      "src": "src/main.js",
       "use": "@vercel/static"
     }
   ],
-  "routes": [{ "src": "/(.*)", "dest": "index.html" }]
+  "routes": [
+    { "src": "/bundle.js", "dest": "/public/bundle.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
