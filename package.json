@@ -6,6 +6,7 @@
   "scripts": {
     "start": "webpack serve --open",
     "build": "webpack",
+    "dev": "webpack serve",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sass": "sass styles/styles.scss css/styles.css --watch"
   },
@@ -16,11 +17,11 @@
     "@swc/cli": "^0.4.1-nightly.20240914",
     "@swc/core": "^1.7.36",
     "css-loader": "^7.1.2",
-    "sass": "^1.80.3",
-    "sass-loader": "^16.0.2",
+    "sass": "^1.83.0",
+    "sass-loader": "^16.0.4",
     "style-loader": "^4.0.0",
     "swc-loader": "^0.2.6",
-    "webpack": "^5.95.0",
+    "webpack": "^5.97.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0"
   },
