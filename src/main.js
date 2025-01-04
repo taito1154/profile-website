@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const contactForm = document.querySelector(".contact-form");
   const formGroups = document.querySelectorAll(".form-group");
   const submitBtn = document.querySelector(".submit-btn");
+  const hash = window.location.hash.substring(1);
+
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
     75,
@@ -151,8 +153,32 @@ document.addEventListener("DOMContentLoaded", () => {
           section.style.display = "none";
         }
       });
+      // // main-headerとfooterを即時表示
+      // gsap.set(".main-header", { opacity: 1, y: 0 });
+      // gsap.set("footer", { y: 0, opacity: 1 });
     } else {
       sectionsContainer.style.display = "none";
+    }
+    if (["about", "work", "contact"].includes(hash)) {
+      gsap.killTweensOf(
+        ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
+      );
+      gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
+      gsap.set(".frame-left, .frame-right", {
+        scaleY: 1,
+        opacity: 1,
+      });
+      gsap.set(".frame-top, .frame-bottom", {
+        scaleX: 1,
+        opacity: 1,
+      });
+      gsap.set(".main-header", { opacity: 1, y: 0 });
+      gsap.set("footer", { y: 0, opacity: 1 });
+
+      boxes.forEach((box) => {
+        scene.remove(box);
+      });
+      boxes.length = 0;
     }
   }
 
@@ -232,7 +258,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     box.userData.sectionId = sectionIds[index]; // セクションIDを設定
-    scene.add(box);
+    if (!hash || hash === "home") {
+      scene.add(box);
+    }
     return box;
   });
   camera.position.z = 5;
@@ -269,16 +297,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 他のアクション（セクション表示など）もここで追加可能
       console.log(`Clicked on box for section: ${sectionId}`);
-
-      window.location.hash = sectionId; // URLのハッシュを変更
-      // let index = boxes.indexOf(clickedBox); // クリックされたボックスのインデックス
-      // resetBox(index);
-
       // ボックスを即座に削除し、boxes配列も空にする
       boxes.forEach((box) => {
         scene.remove(box);
       });
       boxes.length = 0; // boxes配列を空にする
+      window.location.hash = sectionId; // URLのハッシュを変更
+      // let index = boxes.indexOf(clickedBox); // クリックされたボックスのインデックス
+      // resetBox(index);
     }
   });
 
