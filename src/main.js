@@ -4,12 +4,59 @@ const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,
 };
+let first = false;
+function AnimateSection(section) {
+  gsap.fromTo(
+    section,
+    { opacity: 0, y: 20 },
+    { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+  );
+}
+function firsthandleRouting() {
+  const hash = window.location.hash.substring(1);
+  const sections = document.querySelectorAll(".section");
+  const mainContent = document.querySelector(".main-content");
+  const sectionsContainer = document.querySelector(".sections");
+
+  if (hash && hash !== "home") {
+    first = true;
+    gsap.killTweensOf(
+      ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
+    );
+    gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
+    gsap.set(".frame-left, .frame-right", {
+      scaleY: 1,
+      opacity: 1,
+    });
+    gsap.set(".frame-top, .frame-bottom", {
+      scaleX: 1,
+      opacity: 1,
+    });
+    gsap.set(".main-header", { opacity: 1, y: 0 });
+    gsap.set("footer", { y: 0, opacity: 1 });
+
+    // mainContent.style.display = "none";
+    sectionsContainer.style.display = "block";
+    sections.forEach((section) => {
+      if (section.id === hash) {
+        section.style.display = "block";
+        AnimateSection(section);
+      } else {
+        section.style.display = "none";
+      }
+    });
+  }
+}
+firsthandleRouting();
 // Initial animation
 document.addEventListener("DOMContentLoaded", () => {
+  firsthandleRouting();
+  window.addEventListener("hashchange", handleRouting);
+  // window.addEventListener("load", handleRouting);
+  // document.addEventListener("DOMContentLoaded", handleRouting);
+
   console.log("Script loaded");
-  // const bigButtons = document.querySelector(".bigButtons");
   const sections = document.querySelector(".sections");
-  // const bigBTNs = document.querySelectorAll(".bigBTN");
   const homeLink = document.querySelector('.main-nav a[href="#home"]');
   const contactSection = document.querySelector(".section");
   const contactForm = document.querySelector(".contact-form");
@@ -143,23 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const sectionsContainer = document.querySelector(".sections");
 
     if (hash && hash !== "home") {
-      // mainContent.style.display = "none";
-      sectionsContainer.style.display = "block";
-      sections.forEach((section) => {
-        if (section.id === hash) {
-          section.style.display = "block";
-          animateSection(section);
-        } else {
-          section.style.display = "none";
-        }
-      });
-      // // main-headerとfooterを即時表示
-      // gsap.set(".main-header", { opacity: 1, y: 0 });
-      // gsap.set("footer", { y: 0, opacity: 1 });
-    } else {
-      sectionsContainer.style.display = "none";
-    }
-    if (["about", "work", "contact"].includes(hash)) {
       gsap.killTweensOf(
         ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
       );
@@ -175,15 +205,84 @@ document.addEventListener("DOMContentLoaded", () => {
       gsap.set(".main-header", { opacity: 1, y: 0 });
       gsap.set("footer", { y: 0, opacity: 1 });
 
+      // mainContent.style.display = "none";
+      sectionsContainer.style.display = "block";
+      sections.forEach((section) => {
+        if (section.id === hash) {
+          section.style.display = "block";
+          animateSection(section);
+        } else {
+          section.style.display = "none";
+        }
+      });
+      if (!boxes.length) return;
       boxes.forEach((box) => {
         scene.remove(box);
       });
       boxes.length = 0;
+    } else {
+      sectionsContainer.style.display = "none";
+      recreateBoxes(); // ボックスを再生成
     }
-  }
+    // if (["about", "work", "contact"].includes(hash)) {
+    //   gsap.killTweensOf(
+    //     ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
+    //   );
+    //   gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
+    //   gsap.set(".frame-left, .frame-right", {
+    //     scaleY: 1,
+    //     opacity: 1,
+    //   });
+    //   gsap.set(".frame-top, .frame-bottom", {
+    //     scaleX: 1,
+    //     opacity: 1,
+    //   });
+    //   gsap.set(".main-header", { opacity: 1, y: 0 });
+    //   gsap.set("footer", { y: 0, opacity: 1 });
 
-  window.addEventListener("hashchange", handleRouting);
-  window.addEventListener("load", handleRouting);
+    //   boxes.forEach((box) => {
+    //     scene.remove(box);
+    //   });
+    //   boxes.length = 0;
+    // }
+  }
+  // function firsthandleRouting() {
+  //   const hash = window.location.hash.substring(1);
+  //   const sections = document.querySelectorAll(".section");
+  //   const mainContent = document.querySelector(".main-content");
+  //   const sectionsContainer = document.querySelector(".sections");
+
+  //   if (hash && hash !== "home") {
+  //     gsap.killTweensOf(
+  //       ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
+  //     );
+  //     gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
+  //     gsap.set(".frame-left, .frame-right", {
+  //       scaleY: 1,
+  //       opacity: 1,
+  //     });
+  //     gsap.set(".frame-top, .frame-bottom", {
+  //       scaleX: 1,
+  //       opacity: 1,
+  //     });
+  //     gsap.set(".main-header", { opacity: 1, y: 0 });
+  //     gsap.set("footer", { y: 0, opacity: 1 });
+
+  //     // mainContent.style.display = "none";
+  //     sectionsContainer.style.display = "block";
+  //     sections.forEach((section) => {
+  //       if (section.id === hash) {
+  //         section.style.display = "block";
+  //         animateSection(section);
+  //       } else {
+  //         section.style.display = "none";
+  //       }
+  //     });
+  //   } else {
+  //     sectionsContainer.style.display = "none";
+  //     recreateBoxes(); // ボックスを再生成
+  //   }
+  // }
 
   // document.body.appendChild(renderer.domElement);
   // 環境光を追加
@@ -261,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!hash || hash === "home") {
       scene.add(box);
     }
+    // handleRouting()
     return box;
   });
   camera.position.z = 5;
@@ -377,6 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     recreateBoxes();
   });
+
   // コンタクトフォームの送信イベント
   contactForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -401,67 +502,67 @@ document.addEventListener("DOMContentLoaded", () => {
       gsap.to(formStatus, { opacity: 0, duration: 0.3, delay: 2 });
     }, 3000);
   });
+  if (!first) {
+    // 動画コンテナのアニメーション
+    const videoContainer = document.querySelector(".video-container");
+    gsap.fromTo(
+      videoContainer,
+      { opacity: 1, scale: 1.1, zIndex: 3 },
+      {
+        opacity: 0.8,
+        scale: 1,
+        zIndex: -1,
+        duration: PARAMS.introAnimationDuration,
+        ease: "power2.out",
+      }
+    );
 
-  // 動画コンテナのアニメーション
-  const videoContainer = document.querySelector(".video-container");
-  gsap.fromTo(
-    videoContainer,
-    { opacity: 1, scale: 1.1, zIndex: 3 },
-    {
-      opacity: 0.8,
-      scale: 1,
-      zIndex: -1,
-      duration: PARAMS.introAnimationDuration,
-      ease: "power2.out",
-    }
-  );
+    const video = videoContainer.querySelector("video");
+    gsap.fromTo(
+      video,
+      { filter: "blur(10px)" },
+      {
+        filter: "blur(0px)",
+        duration: PARAMS.introAnimationDuration,
+        ease: "power2.out",
+      }
+    );
+    gsap.from(".main-header", {
+      opacity: 0,
+      y: -50,
+      duration: 1,
+      ease: "power3.out",
+      delay: PARAMS.introAnimationDuration * 0.5,
+    });
+    // フレームのアニメーション
+    gsap.to(".frame-left, .frame-right", {
+      scaleY: 1,
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out",
+      stagger: 0.2,
+      delay: PARAMS.introAnimationDuration * 0.5,
+      autoAlpha: 1,
+    });
 
-  const video = videoContainer.querySelector("video");
-  gsap.fromTo(
-    video,
-    { filter: "blur(10px)" },
-    {
-      filter: "blur(0px)",
-      duration: PARAMS.introAnimationDuration,
-      ease: "power2.out",
-    }
-  );
-  gsap.from(".main-header", {
-    opacity: 0,
-    y: -50,
-    duration: 1,
-    ease: "power3.out",
-    delay: PARAMS.introAnimationDuration * 0.5,
-  });
-  // フレームのアニメーション
-  gsap.to(".frame-left, .frame-right", {
-    scaleY: 1,
-    opacity: 1,
-    duration: 1,
-    ease: "power3.out",
-    stagger: 0.2,
-    delay: PARAMS.introAnimationDuration * 0.5,
-    autoAlpha: 1,
-  });
-
-  gsap.to(".frame-top, .frame-bottom", {
-    scaleX: 1,
-    opacity: 1,
-    duration: 1,
-    ease: "power3.out",
-    stagger: 0.2,
-    delay: PARAMS.introAnimationDuration * 0.5,
-    autoAlpha: 1,
-  });
-  // フッターのアニメーション
-  gsap.from("footer", {
-    y: 100,
-    opacity: 0,
-    duration: 1,
-    ease: "power3.out",
-    delay: PARAMS.introAnimationDuration * 0.5,
-  });
-
+    gsap.to(".frame-top, .frame-bottom", {
+      scaleX: 1,
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out",
+      stagger: 0.2,
+      delay: PARAMS.introAnimationDuration * 0.5,
+      autoAlpha: 1,
+    });
+    // フッターのアニメーション
+    gsap.from("footer", {
+      y: 100,
+      opacity: 0,
+      duration: 1,
+      ease: "power3.out",
+      delay: PARAMS.introAnimationDuration * 0.5,
+    });
+  }
   // Tweakpane setup
   const pane = new Tweakpane.Pane();
 
