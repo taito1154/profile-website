@@ -51,9 +51,15 @@ $box-transition: all 0.3s ease;
   &::-webkit-scrollbar {
     display: none; // Chrome/Safari/Opera用
   }
+  overscroll-behavior: none; /* セクション内のスクロールを制限 */
+  overflow-x: hidden;
 }
 .section {
   background-color: white;
+  width: 100vw; /* ビューポートの幅いっぱいに設定 */
+  height: 100vh; /* ビューポートの高さいっぱいに設定 */
+  margin: 0; /* デフォルトのマージンをリセット */
+  padding: 0; /* デフォルトのパディングをリセット */
 }
 .about-section {
   margin: 0%;
@@ -130,10 +136,13 @@ $box-transition: all 0.3s ease;
 }
 
 body {
-  font-family: Arial, sans-serif;
+  overscroll-behavior: none;
+  overflow: hidden;
+  // font-family: Arial, sans-serif;
   line-height: 1.6;
 }
 .main-content {
+  overscroll-behavior: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -255,6 +264,7 @@ body {
   }
 
   .main-header {
+    overscroll-behavior: none;
     height: auto;
     flex-direction: column;
     padding: 10px 0;
@@ -280,6 +290,7 @@ body {
   }
 }
 .video-container {
+  overscroll-behavior: none; /* スクロールを制限 */
   position: fixed;
   top: 0;
   left: 0;

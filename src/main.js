@@ -52,8 +52,6 @@ firsthandleRouting();
 document.addEventListener("DOMContentLoaded", () => {
   firsthandleRouting();
   window.addEventListener("hashchange", handleRouting);
-  // window.addEventListener("load", handleRouting);
-  // document.addEventListener("DOMContentLoaded", handleRouting);
 
   console.log("Script loaded");
   const sections = document.querySelector(".sections");
@@ -224,67 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sectionsContainer.style.display = "none";
       recreateBoxes(); // ボックスを再生成
     }
-    // if (["about", "work", "contact"].includes(hash)) {
-    //   gsap.killTweensOf(
-    //     ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
-    //   );
-    //   gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
-    //   gsap.set(".frame-left, .frame-right", {
-    //     scaleY: 1,
-    //     opacity: 1,
-    //   });
-    //   gsap.set(".frame-top, .frame-bottom", {
-    //     scaleX: 1,
-    //     opacity: 1,
-    //   });
-    //   gsap.set(".main-header", { opacity: 1, y: 0 });
-    //   gsap.set("footer", { y: 0, opacity: 1 });
-
-    //   boxes.forEach((box) => {
-    //     scene.remove(box);
-    //   });
-    //   boxes.length = 0;
-    // }
   }
-  // function firsthandleRouting() {
-  //   const hash = window.location.hash.substring(1);
-  //   const sections = document.querySelectorAll(".section");
-  //   const mainContent = document.querySelector(".main-content");
-  //   const sectionsContainer = document.querySelector(".sections");
-
-  //   if (hash && hash !== "home") {
-  //     gsap.killTweensOf(
-  //       ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
-  //     );
-  //     gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
-  //     gsap.set(".frame-left, .frame-right", {
-  //       scaleY: 1,
-  //       opacity: 1,
-  //     });
-  //     gsap.set(".frame-top, .frame-bottom", {
-  //       scaleX: 1,
-  //       opacity: 1,
-  //     });
-  //     gsap.set(".main-header", { opacity: 1, y: 0 });
-  //     gsap.set("footer", { y: 0, opacity: 1 });
-
-  //     // mainContent.style.display = "none";
-  //     sectionsContainer.style.display = "block";
-  //     sections.forEach((section) => {
-  //       if (section.id === hash) {
-  //         section.style.display = "block";
-  //         animateSection(section);
-  //       } else {
-  //         section.style.display = "none";
-  //       }
-  //     });
-  //   } else {
-  //     sectionsContainer.style.display = "none";
-  //     recreateBoxes(); // ボックスを再生成
-  //   }
-  // }
-
-  // document.body.appendChild(renderer.domElement);
   // 環境光を追加
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
@@ -358,8 +296,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     box.userData.sectionId = sectionIds[index]; // セクションIDを設定
     if (!hash || hash === "home") {
+      box.scale.set(0, 0, 0); // 初期状態でスケールを0に
       scene.add(box);
     }
+    // アニメーションで徐々にスケールを1に
+    gsap.to(box.scale, {
+      x: 1,
+      y: 1,
+      z: 1,
+      duration: 1.5,
+      delay: PARAMS.introAnimationDuration * 0.6,
+      ease: "power3.out",
+    });
+
     // handleRouting()
     return box;
   });
@@ -453,7 +402,16 @@ document.addEventListener("DOMContentLoaded", () => {
         box.position.set(-2, -1, 2);
       }
       box.userData.sectionId = sectionIds[index];
+      box.scale.set(0, 0, 0); // 初期状態でスケールを0に
       scene.add(box);
+      // アニメーションで徐々にスケールを1に
+      gsap.to(box.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        duration: 1.5,
+        ease: "power3.out",
+      });
       console.log(`Box ${index} created:`, box);
       return box;
     });
