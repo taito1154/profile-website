@@ -12,6 +12,67 @@ function AnimateSection(section) {
     { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
   );
 }
+function fsetupGuiltyPhotos() {
+  const container = document.getElementById("Guilty-photos");
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    container.clientWidth / container.clientHeight,
+    0.1,
+    1000
+  );
+  const renderer = new THREE.WebGLRenderer({ alpha: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
+
+  const loader = new THREE.TextureLoader();
+  const photoTextures = [
+    loader.load("..public/photo/Guilty1.JPG"),
+    loader.load("..public/photo/Guilty2.jpg"),
+    loader.load("..public/photo/Guilty3.JPG"),
+  ];
+
+  const geometry = new THREE.PlaneGeometry(1, 1);
+  const photos = photoTextures.map((texture, index) => {
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        texture: { value: texture },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D texture;
+        varying vec2 vUv;
+        void main() {
+          gl_FragColor = texture2D(texture, vUv);
+        }
+      `,
+    });
+    const photo = new THREE.Mesh(geometry, material);
+    photo.position.set((index - 1) * 1.5, 0, 0);
+    scene.add(photo);
+    return photo;
+  });
+
+  camera.position.z = 3;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener("resize", () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+}
 function firsthandleRouting() {
   const hash = window.location.hash.substring(1);
   const sections = document.querySelectorAll(".section");
@@ -41,6 +102,9 @@ function firsthandleRouting() {
       if (section.id === hash) {
         section.style.display = "block";
         AnimateSection(section);
+        if (section.id === "work") {
+          fsetupGuiltyPhotos();
+        }
       } else {
         section.style.display = "none";
       }
@@ -209,6 +273,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (section.id === hash) {
           section.style.display = "block";
           animateSection(section);
+          if (section.id === "work") {
+            setupGuiltyPhotos();
+          }
         } else {
           section.style.display = "none";
         }
@@ -356,6 +423,68 @@ document.addEventListener("DOMContentLoaded", () => {
       // resetBox(index);
     }
   });
+
+  function setupGuiltyPhotos() {
+    const container = document.getElementById("Guilty-photos");
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    const loader = new THREE.TextureLoader();
+    const photoTextures = [
+      loader.load("public/photo/Guilty1.JPG"),
+      loader.load("public/photo/Guilty2.jpg"),
+      loader.load("public/photo/Guilty3.JPG"),
+    ];
+
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const photos = photoTextures.map((texture, index) => {
+      const material = new THREE.ShaderMaterial({
+        uniforms: {
+          texture: { value: texture },
+        },
+        vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+        fragmentShader: `
+        uniform sampler2D textureMap;
+        varying vec2 vUv;
+        void main() {
+          gl_FragColor = texture(textureMap, vUv);
+        }
+      `,
+      });
+      const photo = new THREE.Mesh(geometry, material);
+      photo.position.set((index - 1) * 1.5, 0, 0);
+      scene.add(photo);
+      return photo;
+    });
+
+    camera.position.z = 3;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  }
 
   // コンタクトフォームのアニメーション関数
   function animateContactForm() {
