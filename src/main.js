@@ -12,67 +12,7 @@ function AnimateSection(section) {
     { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
   );
 }
-function fsetupGuiltyPhotos() {
-  const container = document.getElementById("Guilty-photos");
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    1000
-  );
-  const renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(renderer.domElement);
 
-  const loader = new THREE.TextureLoader();
-  const photoTextures = [
-    loader.load("..public/photo/Guilty1.JPG"),
-    loader.load("..public/photo/Guilty2.jpg"),
-    loader.load("..public/photo/Guilty3.JPG"),
-  ];
-
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const photos = photoTextures.map((texture, index) => {
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        texture: { value: texture },
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D texture;
-        varying vec2 vUv;
-        void main() {
-          gl_FragColor = texture2D(texture, vUv);
-        }
-      `,
-    });
-    const photo = new THREE.Mesh(geometry, material);
-    photo.position.set((index - 1) * 1.5, 0, 0);
-    scene.add(photo);
-    return photo;
-  });
-
-  camera.position.z = 3;
-
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener("resize", () => {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-  });
-}
 function firsthandleRouting() {
   const hash = window.location.hash.substring(1);
   const sections = document.querySelectorAll(".section");
@@ -103,7 +43,7 @@ function firsthandleRouting() {
         section.style.display = "block";
         AnimateSection(section);
         if (section.id === "work") {
-          fsetupGuiltyPhotos();
+          // fsetupGuiltyPhotos();
         }
       } else {
         section.style.display = "none";
@@ -425,7 +365,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function setupGuiltyPhotos() {
-    const container = document.getElementById("Guilty-photos");
+    const container = document.getElementById("Canvas");
+    const canvas = document.getElementById("threeCanvas");
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -433,42 +374,84 @@ document.addEventListener("DOMContentLoaded", () => {
       0.1,
       1000
     );
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
 
     const loader = new THREE.TextureLoader();
-    const photoTextures = [
-      loader.load("public/photo/Guilty1.JPG"),
-      loader.load("public/photo/Guilty2.jpg"),
-      loader.load("public/photo/Guilty3.JPG"),
+    const photoPaths = [
+      "public/photo/Guilty1.JPG",
+      "public/photo/Guilty2.jpg",
+      "public/photo/Guilty3.JPG",
     ];
 
-    const geometry = new THREE.PlaneGeometry(1, 1);
-    const photos = photoTextures.map((texture, index) => {
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          texture: { value: texture },
+    const photos = [];
+    let loadedCount = 0;
+
+    photoPaths.forEach((path, index) => {
+      loader.load(
+        path,
+        (texture) => {
+          // テクスチャがロードされたときに実行
+          const imageWidth = texture.image.width;
+          const imageHeight = texture.image.height;
+
+          // アスペクト比を計算
+          const aspectRatio = imageWidth / imageHeight;
+
+          // ジオメトリの幅と高さを設定
+          const width = 2; // 幅を基準に固定
+          const height = width / aspectRatio; // 高さをアスペクト比に基づいて計算
+
+          const geometry = new THREE.PlaneGeometry(width, height);
+          const material = new THREE.ShaderMaterial({
+            uniforms: {
+              textureMap: { value: texture },
+              lightDirection: {
+                value: new THREE.Vector3(0.5, 1, 0.5).normalize(),
+              }, // 光の方向を設定
+            },
+            vertexShader: `
+          varying vec2 vUv;
+    varying vec3 vNormal; // 法線をフラグメントシェーダーに渡す
+    varying vec3 vPosition; // 頂点位置をフラグメントシェーダーに渡す
+
+    void main() {
+      vUv = uv;
+      vNormal = normal; // 法線を保存
+      vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+            fragmentShader: `
+          uniform sampler2D textureMap;
+          varying vec2 vUv;
+          void main() {
+            gl_FragColor = texture(textureMap, vUv);
+          }
+        `,
+          });
+
+          // メッシュを作成
+          const photo = new THREE.Mesh(geometry, material);
+
+          // 配置位置を設定
+          photo.position.set((index - 1) * (aspectRatio + 0.5), 0, 0);
+
+          // シーンに追加
+          scene.add(photo);
+          photos.push(photo);
+
+          loadedCount++;
+          if (loadedCount === photoPaths.length) {
+            // 全ての写真がロードされた後にアニメーションを開始
+            animate();
+          }
         },
-        vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        undefined,
+        (err) => {
+          console.error(`Failed to load texture at ${path}`, err);
         }
-      `,
-        fragmentShader: `
-        uniform sampler2D textureMap;
-        varying vec2 vUv;
-        void main() {
-          gl_FragColor = texture(textureMap, vUv);
-        }
-      `,
-      });
-      const photo = new THREE.Mesh(geometry, material);
-      photo.position.set((index - 1) * 1.5, 0, 0);
-      scene.add(photo);
-      return photo;
+      );
     });
 
     camera.position.z = 3;
@@ -477,13 +460,17 @@ document.addEventListener("DOMContentLoaded", () => {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     }
-    animate();
 
-    window.addEventListener("resize", () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
+    function onResize() {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    });
+      renderer.setSize(width, height);
+    }
+
+    window.addEventListener("resize", onResize);
+    onResize();
   }
 
   // コンタクトフォームのアニメーション関数
