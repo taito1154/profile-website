@@ -1,4 +1,3 @@
-// webpack.config.js file
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
@@ -15,22 +14,34 @@ module.exports = {
       },
       {
         test: /\.s[ac]ss$/i,
-        use: [
-          "style-loader", // Injects styles into DOM
-          "css-loader", // Turns CSS into CommonJS
-          "sass-loader", // Compiles Sass to CSS
-        ],
+        use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader"],
       },
+      // Add video file handling
+      {
+        test: /\.(mp4|webm)$/,
+        type: "asset/resource",
+        generator: {
+          filename: "video/[name][ext]",
+        },
+      },
     ],
   },
   plugins: [
-    // Add this section
     new HtmlWebpackPlugin({
-      template: "./index.html", // Path to your source HTML
+      template: "./index.html",
+    }),
+    // Add CopyPlugin to copy video files
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "video",
+          to: "video",
+        },
+      ],
     }),
   ],
   resolve: {
@@ -40,6 +51,7 @@ module.exports = {
     filename: "bundle.js",
     path: path.resolve(__dirname, "public"),
     clean: true,
+    publicPath: "/",
   },
   devServer: {
     static: {
