@@ -26,16 +26,20 @@ module.exports = {
     publicPath: "/",
     clean: true,
   },
-  // plugins: [
-  //   new CopyPlugin({
-  //     patterns: [
-  //       {
-  //         from: "static",
-  //         to: "static",
-  //       },
-  //     ],
-  //   }),
-  // ],
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "index.html",
+          to: "index.html",
+        },
+        {
+          from: "static",
+          to: "static",
+        },
+      ],
+    }),
+  ],
   devServer: {
     static: {
       directory: path.join(__dirname, "/"),
