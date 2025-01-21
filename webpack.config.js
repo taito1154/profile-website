@@ -1,5 +1,6 @@
 // webpack.config.js file
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -21,16 +22,23 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    // Add this section
+    new HtmlWebpackPlugin({
+      template: "./index.html", // Path to your source HTML
+    }),
+  ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
   output: {
     filename: "bundle.js",
-    path: path.resolve(__dirname, "public"),
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, "/"),
+      directory: path.join(__dirname, "dist"),
     },
     compress: true,
     port: 9000,
