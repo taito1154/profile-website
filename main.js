@@ -11,6 +11,7 @@
 // console.log(scene);
 // console.log(camera);
 // console.log(rerender);
+import "./css/styles.css";
 
 const PARAMS = {
   animationSpeed: 0.5,
@@ -45,19 +46,19 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.fromTo(
       contactSection,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
     );
 
     gsap.fromTo(
       formGroups,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" },
     );
 
     gsap.fromTo(
       submitBtn,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, delay: 0.5, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.5, delay: 0.5, ease: "power2.out" },
     );
   }
   // セクションのアニメーション関数を追加
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.fromTo(
       section,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
     );
   }
   // ボタンのアニメーション
@@ -82,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ease: "back.out(1.7)",
       stagger: 0.2,
       delay: PARAMS.introAnimationDuration * 0.5,
-    }
+    },
   );
 
   homeLink.addEventListener("click", (e) => {
@@ -170,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.fromTo(
       formStatus,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, delay: 0.5 }
+      { opacity: 1, y: 0, duration: 0.5, delay: 0.5 },
     );
 
     setTimeout(() => {
@@ -200,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
       zIndex: -1,
       duration: PARAMS.introAnimationDuration,
       ease: "power2.out",
-    }
+    },
   );
 
   const video = videoContainer.querySelector("video");
@@ -211,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
       filter: "blur(0px)",
       duration: PARAMS.introAnimationDuration,
       ease: "power2.out",
-    }
+    },
   );
   gsap.from(".main-header", {
     opacity: 0,

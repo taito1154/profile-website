@@ -1,10 +1,11 @@
 // webpack.config.js file
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.ts",
+  entry: "./main.js",
   module: {
     rules: [
       {
@@ -19,6 +20,10 @@ module.exports = {
           "css-loader", // Turns CSS into CommonJS
           "sass-loader", // Compiles Sass to CSS
         ],
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
