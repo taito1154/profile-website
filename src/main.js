@@ -1,5 +1,7 @@
+// import { float } from "three/tsl";
 import * as THREE from "../node_modules/three/build/three.module.js";
-
+import "../styles/styles.scss";
+// import "/css/styles.css";
 const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,
@@ -268,12 +270,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const videoTextures = [
-    createVideoTexture("public/video/kemuri.mp4"),
-    createVideoTexture("public/video/kemuri.mp4"),
-    createVideoTexture("public/video/kemuri.mp4"),
-    createVideoTexture("public/video/about-Shungo-video.mp4"),
-    createVideoTexture("public/video/contact-Shungo-video.mp4"),
-    createVideoTexture("public/video/work-Shungo-video.mp4"),
+    createVideoTexture("static/video/kemuri.mp4"),
+    createVideoTexture("static/video/kemuri.mp4"),
+    createVideoTexture("static/video/kemuri.mp4"),
+    createVideoTexture("static/video/about-Shungo-video.mp4"),
+    createVideoTexture("static/video/contact-Shungo-video.mp4"),
+    createVideoTexture("static/video/work-Shungo-video.mp4"),
   ];
 
   const materials = videoTextures
@@ -364,24 +366,77 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function setupGuiltyPhotos() {
+  function backScreen() {
     const container = document.getElementById("Canvas");
     const canvas = document.getElementById("threeCanvas");
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
+    const backscene = newTHREE.Scene();
+    const backcamera = new THREE.PerspectiveCamera(
       75,
       container.clientWidth / container.clientHeight,
       0.1,
       1000
     );
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    const backrenderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+    });
+    backrenderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    const backmaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        u_time,
+      },
+      vertexShader: `
+          varying vec2 vUv;
+    varying vec3 vNormal; // 法線をフラグメントシェーダーに渡す
+    varying vec3 vPosition; // 頂点位置をフラグメントシェーダーに渡す
+
+    void main() {
+
+      vUv = uv;
+      vNormal = normal; // 法線を保存
+      vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+      fragmentShader: `
+          #ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform vec2 u_resolution;
+uniform float u_time;
+void main(){
+vec2 uv=(fragcoord*2.0-iResolution.xy)/iResolution.y;
+float d=length(uv);
+d-=0.5;
+d=abs(d);
+fragcolor(u_time,u_time+1,u_time+2,1.0);
+}
+        `,
+    });
+  }
+
+  function setupGuiltyPhotos() {
+    const container = document.getElementById("Canvas");
+    const canvas = document.getElementById("threeCanvas");
+    const photoscene = new THREE.Scene();
+    const photocamera = new THREE.PerspectiveCamera(
+      75,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    );
+    const photorenderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+    });
+    photorenderer.setSize(canvas.clientWidth, canvas.clientHeight);
 
     const loader = new THREE.TextureLoader();
     const photoPaths = [
-      "public/photo/Guilty1.JPG",
-      "public/photo/Guilty2.jpg",
-      "public/photo/Guilty3.JPG",
+      "static/photo/Guilty1.JPG",
+      "static/photo/Guilty2.jpg",
+      "static/photo/Guilty3.JPG",
     ];
 
     const photos = [];
@@ -402,8 +457,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const width = 2; // 幅を基準に固定
           const height = width / aspectRatio; // 高さをアスペクト比に基づいて計算
 
-          const geometry = new THREE.PlaneGeometry(width, height);
-          const material = new THREE.ShaderMaterial({
+          const photogeometry = new THREE.PlaneGeometry(width, height);
+          const photomaterial = new THREE.ShaderMaterial({
             uniforms: {
               textureMap: { value: texture },
               lightDirection: {
@@ -432,13 +487,13 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           // メッシュを作成
-          const photo = new THREE.Mesh(geometry, material);
+          const photo = new THREE.Mesh(photogeometry, photomaterial);
 
           // 配置位置を設定
           photo.position.set((index - 1) * (aspectRatio + 0.5), 0, 0);
 
           // シーンに追加
-          scene.add(photo);
+          photoscene.add(photo);
           photos.push(photo);
 
           loadedCount++;
@@ -454,19 +509,19 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
-    camera.position.z = 3;
+    photocamera.position.z = 3;
 
     function animate() {
       requestAnimationFrame(animate);
-      renderer.render(scene, camera);
+      photorenderer.render(photoscene, photocamera);
     }
 
     function onResize() {
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
+      photocamera.aspect = width / height;
+      photocamera.updateProjectionMatrix();
+      photorenderer.setSize(width, height);
     }
 
     window.addEventListener("resize", onResize);

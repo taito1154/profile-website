@@ -1,22 +1,6 @@
 {
-  "builds": [
-    {
-      "src": "src/main.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/bundle.js",
-      "dest": "/src/main.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  "buildCommand": "webpack",
+  "outputDirectory": "dist",
+  "public": true,
+  "framework": null
 }
