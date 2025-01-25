@@ -652,25 +652,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const canvas = document.getElementById("threeCanvas");
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
-      let isHovered = false; // ホバー状態を追跡
+      let isHovered = false;
 
       canvas.addEventListener("mousemove", (event) => {
-        // マウス座標の計算を修正
         const rect = canvas.getBoundingClientRect();
         mouse.x = ((event.clientX - rect.left) / canvas.clientWidth) * 2 - 1;
         mouse.y = -((event.clientY - rect.top) / canvas.clientHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, photocamera);
-        const intersects = raycaster.intersectObjects(photos);
+        // 1枚目の写真だけを判定対象にする
+        const intersects = raycaster.intersectObject(photos[0]);
 
-        // ホバー状態の変更を検出
         const currentlyHovered = intersects.length > 0;
         if (currentlyHovered !== isHovered) {
           isHovered = currentlyHovered;
 
           if (isHovered) {
-            // ホバー開始時のアニメーション
-            console.log("Hover started"); // デバッグ用
+            // ホバー時のアニメーション
             gsap.to(photos[1].position, {
               x: 2,
               duration: 0.5,
@@ -686,8 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
               duration: 0.5,
             });
           } else {
-            // ホバー終了時のアニメーション
-            console.log("Hover ended"); // デバッグ用
+            // マウスが離れた時のアニメーション
             gsap.to(photos[1].position, {
               x: 0,
               duration: 0.5,
@@ -704,12 +701,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
           }
         }
-      });
-
-      // デバッグ用：写真の位置とサイズを確認
-      photos.forEach((photo, index) => {
-        console.log(`Photo ${index} position:`, photo.position);
-        console.log(`Photo ${index} geometry:`, photo.geometry);
       });
     }
 
