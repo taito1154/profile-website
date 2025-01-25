@@ -306,6 +306,7 @@ canvas {
   width: 100%;
   height: 100%;
   display: block;
+  pointer-events: auto;
 }
 
 .canvas-frame {
@@ -314,7 +315,7 @@ canvas {
   right: var(--pad);
   top: var(--pad);
   bottom: var(--pad);
-  pointer-events: none;
+  pointer-events: auto;
   overflow: hidden;
   z-index: 10;
 }
@@ -403,6 +404,15 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#threeCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
 }
 
 /*# sourceMappingURL=styles.css.map */

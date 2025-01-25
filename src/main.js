@@ -1,4 +1,3 @@
-// import { float } from "three/tsl";
 import * as THREE from "../node_modules/three/build/three.module.js";
 import "../styles/styles.scss";
 
@@ -476,7 +475,6 @@ document.addEventListener("DOMContentLoaded", () => {
         varying vec2 vUv;
 
         void main() {
-          
           vec2 center = vec2(0.5, 0.5);
           vec2 pos = vUv - center;
           float dist = length(pos);
@@ -492,19 +490,18 @@ document.addEventListener("DOMContentLoaded", () => {
       transparent: true,
     });
 
-    // メッシュの作成とシーンへの追加
     const mesh = new THREE.Mesh(geometry, material);
     backscene.add(mesh);
     backcamera.position.z = 1;
 
-    // アニメーションループ
+    let animationFrameId;
+
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
       material.uniforms.u_time.value += 0.01;
       backrenderer.render(backscene, backcamera);
     }
 
-    // リサイズハンドラ
     function onResize() {
       const width = container.clientWidth;
       const height = container.clientHeight;
@@ -565,11 +562,31 @@ document.addEventListener("DOMContentLoaded", () => {
       preserveDrawingBuffer: true,
     });
 
-    // レンダラーの重ね順を調整
-    photorenderer.domElement.style.position = "absolute";
-    photorenderer.domElement.style.top = "0";
-    photorenderer.domElement.style.left = "0";
-    photorenderer.domElement.style.zIndex = "2"; // 写真を前面に
+    // キャンバスのスタイルを設定
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+
+    // レンダラーのサイズを設定
+    photorenderer.setSize(container.clientWidth, container.clientHeight);
+    photorenderer.setPixelRatio(window.devicePixelRatio);
+
+    // カメラの設定を調整
+    photocamera.position.z = 3;
+
+    function onResize() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      photocamera.aspect = width / height;
+      photocamera.updateProjectionMatrix();
+      photorenderer.setSize(width, height);
+    }
+
+    // リサイズイベントリスナーを追加
+    window.addEventListener("resize", onResize);
+    onResize(); // 初期サイズを設定
 
     const loader = new THREE.TextureLoader();
     loader.crossOrigin = "anonymous";
@@ -590,16 +607,13 @@ document.addEventListener("DOMContentLoaded", () => {
       loader.load(
         path,
         (texture) => {
-          // テクスチャがロードされたときに実行
           const imageWidth = texture.image.width;
           const imageHeight = texture.image.height;
 
           // アスペクト比を計算
           const aspectRatio = imageWidth / imageHeight;
-
-          // ジオメトリの幅と高さを設定
-          const width = 2; // 幅を基準に固定
-          const height = width / aspectRatio; // 高さをアスペクト比に基づいて計算
+          const width = 2;
+          const height = width / aspectRatio;
 
           const photogeometry = new THREE.PlaneGeometry(width, height);
           const photomaterial = new THREE.MeshBasicMaterial({
@@ -607,20 +621,24 @@ document.addEventListener("DOMContentLoaded", () => {
             transparent: true,
           });
 
-          // メッシュを作成
           const photo = new THREE.Mesh(photogeometry, photomaterial);
 
-          // 配置位置を設定
-          photo.position.set((index - 1) * (aspectRatio + 0.5), 0, 0);
+          // 初期位置を設定：全ての写真を重ねて配置
+          photo.position.set(0, 0, -index * 0.01); // Z軸で少しずつずらして重ねる
 
-          // シーンに追加
+          // 2枚目と3枚目は最初は非表示
+          if (index > 0) {
+            photo.material.opacity = 0;
+          }
+
           photoscene.add(photo);
           photos.push(photo);
 
           loadedCount++;
           if (loadedCount === photoPaths.length) {
-            // 全ての写真がロードされた後にアニメーションを開始
+            console.log("All photos loaded:", photos.length); // デバッグ用
             animate();
+            setupHoverEffect();
           }
         },
         undefined,
@@ -630,7 +648,70 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
-    photocamera.position.z = 3;
+    function setupHoverEffect() {
+      const canvas = document.getElementById("threeCanvas");
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let isHovered = false; // ホバー状態を追跡
+
+      canvas.addEventListener("mousemove", (event) => {
+        // マウス座標の計算を修正
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / canvas.clientWidth) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / canvas.clientHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, photocamera);
+        const intersects = raycaster.intersectObjects(photos);
+
+        // ホバー状態の変更を検出
+        const currentlyHovered = intersects.length > 0;
+        if (currentlyHovered !== isHovered) {
+          isHovered = currentlyHovered;
+
+          if (isHovered) {
+            // ホバー開始時のアニメーション
+            console.log("Hover started"); // デバッグ用
+            gsap.to(photos[1].position, {
+              x: 2,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+            gsap.to(photos[2].position, {
+              x: -2,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+            gsap.to([photos[1].material, photos[2].material], {
+              opacity: 1,
+              duration: 0.5,
+            });
+          } else {
+            // ホバー終了時のアニメーション
+            console.log("Hover ended"); // デバッグ用
+            gsap.to(photos[1].position, {
+              x: 0,
+              duration: 0.5,
+              ease: "power2.in",
+            });
+            gsap.to(photos[2].position, {
+              x: 0,
+              duration: 0.5,
+              ease: "power2.in",
+            });
+            gsap.to([photos[1].material, photos[2].material], {
+              opacity: 0,
+              duration: 0.5,
+            });
+          }
+        }
+      });
+
+      // デバッグ用：写真の位置とサイズを確認
+      photos.forEach((photo, index) => {
+        console.log(`Photo ${index} position:`, photo.position);
+        console.log(`Photo ${index} geometry:`, photo.geometry);
+      });
+    }
 
     // ハッシュが変更されたときのクリーンアップ処理
     const handleHashChange = () => {
