@@ -476,6 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
         varying vec2 vUv;
 
         void main() {
+          
           vec2 center = vec2(0.5, 0.5);
           vec2 pos = vUv - center;
           float dist = length(pos);
@@ -491,18 +492,19 @@ document.addEventListener("DOMContentLoaded", () => {
       transparent: true,
     });
 
+    // メッシュの作成とシーンへの追加
     const mesh = new THREE.Mesh(geometry, material);
     backscene.add(mesh);
     backcamera.position.z = 1;
 
-    let animationFrameId;
-
+    // アニメーションループ
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
       material.uniforms.u_time.value += 0.01;
       backrenderer.render(backscene, backcamera);
     }
 
+    // リサイズハンドラ
     function onResize() {
       const width = container.clientWidth;
       const height = container.clientHeight;
