@@ -9,6 +9,10 @@ const PARAMS = {
 
 let first = false;
 
+// グローバル変数として定義
+let boxes = [];
+let videoTextures = [];
+
 function AnimateSection(section) {
   gsap.fromTo(
     section,
@@ -268,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else {
       sectionsContainer.style.display = "none";
-      recreateBoxes();
+      createBoxes();
     }
   }
   // 環境光を追加
@@ -308,58 +312,66 @@ document.addEventListener("DOMContentLoaded", () => {
     // return new THREE.VideoTexture(video);
   }
 
-  const videoTextures = [
-    createVideoTexture("static/video/kemuri.mp4"),
-    createVideoTexture("static/video/kemuri.mp4"),
-    createVideoTexture("static/video/kemuri.mp4"),
-    createVideoTexture("static/video/about-Shungo-video.mp4"),
-    createVideoTexture("static/video/contact-Shungo-video.mp4"),
-    createVideoTexture("static/video/work-Shungo-video.mp4"),
-  ];
+  function createBoxes() {
+    // 既存のボックスをクリーンアップ
+    boxes.forEach((box) => {
+      scene.remove(box);
+      box.geometry.dispose();
+      box.material.dispose();
+    });
+    boxes = [];
 
-  const materials = videoTextures
-    .slice(0, 3) // videoTextures 配列の最初の3つを取得
-    .map(
+    // 新しいvideoTexturesを作成
+    videoTextures = [
+      createVideoTexture("static/video/kemuri.mp4"),
+      createVideoTexture("static/video/kemuri.mp4"),
+      createVideoTexture("static/video/kemuri.mp4"),
+      createVideoTexture("static/video/about-Shungo-video.mp4"),
+      createVideoTexture("static/video/contact-Shungo-video.mp4"),
+      createVideoTexture("static/video/work-Shungo-video.mp4"),
+    ];
+
+    const materials = videoTextures.slice(0, 3).map(
       () =>
         new THREE.MeshPhongMaterial({
-          color: 0xffffff, // 通常は白色
-          // map: texture,
+          color: 0xffffff,
           transparent: true,
           opacity: 1,
-          // color: 0x000000, // 黒色
         })
     );
 
-  const sectionIds = ["about", "work", "contact"];
-  let boxes = materials.map((material, index) => {
-    const box = new THREE.Mesh(boxGeometry, materials[index]);
-    // 各ボックスの位置を設定
-    if (index === 0) {
-      box.position.set(0, 1, 2); // ボックス1: 上部中央
-    } else if (index === 1) {
-      box.position.set(2, -1, 2); // ボックス2: 下部中央
-    } else if (index === 2) {
-      box.position.set(-2, -1, 2); // ボックス3: 左下
-    }
+    const sectionIds = ["about", "work", "contact"];
+    boxes = materials.map((material, index) => {
+      const box = new THREE.Mesh(boxGeometry, materials[index]);
 
-    box.userData.sectionId = sectionIds[index]; // セクションIDを設定
-    if (!hash || hash === "home") {
-      box.scale.set(0, 0, 0); // 初期状態でスケールを0に
+      if (index === 0) {
+        box.position.set(0, 1, 2);
+      } else if (index === 1) {
+        box.position.set(2, -1, 2);
+      } else if (index === 2) {
+        box.position.set(-2, -1, 2);
+      }
+
+      box.userData.sectionId = sectionIds[index];
+      box.scale.set(0, 0, 0);
       scene.add(box);
-    }
-    // アニメーションで徐々にスケールを1に
-    gsap.to(box.scale, {
-      x: 1,
-      y: 1,
-      z: 1,
-      duration: 1.5,
-      delay: PARAMS.introAnimationDuration * 0.6,
-      ease: "power3.out",
-    });
 
-    // handleRouting()
-    return box;
-  });
+      gsap.to(box.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        duration: 1.5,
+        delay: PARAMS.introAnimationDuration * 0.6,
+        ease: "power3.out",
+      });
+
+      return box;
+    });
+  }
+
+  // 元のコードの代わりにこの関数を呼び出す
+  createBoxes();
+
   camera.position.z = 5;
   // アニメーションループ
   function animate() {
@@ -415,52 +427,104 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function backScreen() {
     const container = document.getElementById("Canvas");
-    const canvas = document.getElementById("threeCanvas");
-    const backscene = newTHREE.Scene();
+
+    // 新しいcanvas要素を作成
+    const backCanvas = document.createElement("canvas");
+    backCanvas.id = "backCanvas";
+    backCanvas.style.position = "absolute";
+    backCanvas.style.top = "0";
+    backCanvas.style.left = "0";
+    backCanvas.style.zIndex = "1"; // 背景を後ろに
+    container.appendChild(backCanvas);
+
+    const backscene = new THREE.Scene();
     const backcamera = new THREE.PerspectiveCamera(
       75,
       container.clientWidth / container.clientHeight,
       0.1,
       1000
     );
+
     const backrenderer = new THREE.WebGLRenderer({
-      canvas: canvas,
+      canvas: backCanvas,
       alpha: true,
     });
-    backrenderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    const backmaterial = new THREE.ShaderMaterial({
+    backrenderer.setSize(container.clientWidth, container.clientHeight);
+
+    // ジオメトリとマテリアルの作成
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const material = new THREE.ShaderMaterial({
       uniforms: {
-        u_time,
+        u_time: { value: 0.0 },
+        u_resolution: {
+          value: new THREE.Vector2(
+            container.clientWidth,
+            container.clientHeight
+          ),
+        },
       },
       vertexShader: `
-          varying vec2 vUv;
-    varying vec3 vNormal; // 法線をフラグメントシェーダーに渡す
-    varying vec3 vPosition; // 頂点位置をフラグメントシェーダーに渡す
-
-    void main() {
-
-      vUv = uv;
-      vNormal = normal; // 法線を保存
-      vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position, 1.0);
+        }
+      `,
       fragmentShader: `
-          #ifdef GL_ES
-precision mediump float;
-#endif
+        uniform float u_time;
+        uniform vec2 u_resolution;
+        varying vec2 vUv;
 
-uniform vec2 u_resolution;
-uniform float u_time;
-void main(){
-vec2 uv=(fragcoord*2.0-iResolution.xy)/iResolution.y;
-float d=length(uv);
-d-=0.5;
-d=abs(d);
-fragcolor(u_time,u_time+1,u_time+2,1.0);
-}
-        `,
+        void main() {
+          vec2 center = vec2(0.5, 0.5);
+          vec2 pos = vUv - center;
+          float dist = length(pos);
+          
+          float wave = sin(dist * 10.0 - u_time * 2.0) * 0.5 + 0.5;
+          float circle = smoothstep(0.5, 0.4, dist);
+          float pattern = wave * circle;
+          
+          vec3 color = vec3(0.2, 0.4, 0.8) * pattern;
+          gl_FragColor = vec4(color, pattern * 0.5);
+        }
+      `,
+      transparent: true,
     });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    backscene.add(mesh);
+    backcamera.position.z = 1;
+
+    let animationFrameId;
+
+    function animate() {
+      animationFrameId = requestAnimationFrame(animate);
+      material.uniforms.u_time.value += 0.01;
+      backrenderer.render(backscene, backcamera);
+    }
+
+    function onResize() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      backrenderer.setSize(width, height);
+      material.uniforms.u_resolution.value.set(width, height);
+      backcamera.aspect = width / height;
+      backcamera.updateProjectionMatrix();
+    }
+
+    window.addEventListener("resize", onResize);
+    animate();
+
+    // クリーンアップ関数を返す
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      backrenderer.dispose();
+      material.dispose();
+      geometry.dispose();
+      if (backCanvas.parentNode) {
+        backCanvas.parentNode.removeChild(backCanvas);
+      }
+    };
   }
 
   let photos = [];
@@ -481,6 +545,9 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
       photorenderer.dispose();
     }
 
+    // backScreenを先に実行して背景を設定
+    const cleanupBackScreen = backScreen();
+
     const container = document.getElementById("Canvas");
     const canvas = document.getElementById("threeCanvas");
     photoscene = new THREE.Scene();
@@ -496,6 +563,12 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
       preserveDrawingBuffer: true,
     });
 
+    // レンダラーの重ね順を調整
+    photorenderer.domElement.style.position = "absolute";
+    photorenderer.domElement.style.top = "0";
+    photorenderer.domElement.style.left = "0";
+    photorenderer.domElement.style.zIndex = "2"; // 写真を前面に
+
     const loader = new THREE.TextureLoader();
     loader.crossOrigin = "anonymous";
 
@@ -509,6 +582,7 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
     ];
 
     let loadedCount = 0;
+    let animationFrameId;
 
     photoPaths.forEach((path, index) => {
       loader.load(
@@ -556,9 +630,10 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
 
     photocamera.position.z = 3;
 
-    function cleanup() {
+    // ハッシュが変更されたときのクリーンアップ処理
+    const handleHashChange = () => {
       if (photorenderer) {
-        cancelAnimationFrame(animationFrameId); // アニメーションを停止
+        cancelAnimationFrame(animationFrameId);
         photos.forEach((photo) => {
           if (photo.material.map) {
             photo.material.map.dispose();
@@ -570,12 +645,12 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
         photos = [];
         photorenderer.dispose();
       }
-    }
+      cleanupBackScreen(); // 背景のクリーンアップも実行
+    };
 
     // ハッシュが変更されたときにクリーンアップを実行
-    window.addEventListener("hashchange", cleanup);
+    window.addEventListener("hashchange", handleHashChange);
 
-    let animationFrameId;
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
       photorenderer.render(photoscene, photocamera);
