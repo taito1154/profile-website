@@ -1,12 +1,14 @@
 // import { float } from "three/tsl";
 import * as THREE from "../node_modules/three/build/three.module.js";
 import "../styles/styles.scss";
-// import "/css/styles.css";
+
 const PARAMS = {
   animationSpeed: 0.5,
   introAnimationDuration: 10,
 };
+
 let first = false;
+
 function AnimateSection(section) {
   gsap.fromTo(
     section,
@@ -102,15 +104,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const video = videoTexture?.image;
 
     if (video) {
-      video.pause(); // 動画を停止
-      video.currentTime = 0; // 再生位置をリセット
-      boxes[index].material.map = null; // テクスチャを解除
-      boxes[index].material.needsUpdate = true; // マテリアルの更新を強制
+      video.pause();
+      video.currentTime = 0;
+      boxes[index].material.map = null;
+      boxes[index].material.needsUpdate = true;
+
+      // 動画を再生可能な状態に戻す
+      video.loop = true;
+      video.muted = true;
+      video.play().catch((e) => console.log("Video play failed:", e));
     }
 
     // GSAPでボックスの透明度を元に戻す
     gsap.to(boxes[index].material, {
-      opacity: 1, // 元の透明度に戻す
+      opacity: 1,
       duration: 0,
     });
   }
@@ -150,18 +157,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function stopVideo(index) {
-    const video = videoTextures[index]?.image;
+    // 実行中のGSAPアニメーションを即座に停止
+    gsap.killTweensOf(boxes[index].material);
+    const videoTexture = videoTextures[index];
+    const video = videoTexture?.image;
     if (video) {
       video.pause();
       video.currentTime = 0;
       boxes[index].material.map = null;
       boxes[index].material.needsUpdate = true;
+
+      // 動画を再生可能な初期状態に戻す
+      video.loop = true;
+      video.muted = true;
+      video.play().catch((e) => console.log("Video play failed:", e));
+
+      // 即座に透明度を元に戻す
+      gsap.to(boxes[index].material, {
+        opacity: 1,
+        duration: 0,
+      });
     }
   }
 
-  let stopSequence = false; // 停止フラグ
   function playVideoSequence(index) {
-    if (stopSequence) return; // フラグがtrueなら何もしない
     setTimeout(() => {
       gsap.to(boxes[index].material, {
         opacity: 0,
@@ -171,10 +190,23 @@ document.addEventListener("DOMContentLoaded", () => {
           const nextVideoTexture = videoTextures[nextIndex];
           const nextVideo = nextVideoTexture?.image;
           if (nextVideo) {
+            // 現在のビデオを停止
+            const currentVideo = videoTextures[index]?.image;
+            if (currentVideo) {
+              currentVideo.pause();
+              currentVideo.currentTime = 0;
+            }
+
+            // 次のビデオの設定と再生
             nextVideo.currentTime = 0;
             nextVideo.loop = true;
-            nextVideo.play();
+            nextVideo.muted = true;
+            nextVideo.play().catch((e) => console.log("Video play failed:", e));
+
+            // マテリアルの更新
             boxes[index].material.map = nextVideoTexture;
+            boxes[index].material.needsUpdate = true;
+
             gsap.to(boxes[index].material, {
               opacity: 1,
               duration: 2,
@@ -209,7 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
       gsap.set(".main-header", { opacity: 1, y: 0 });
       gsap.set("footer", { y: 0, opacity: 1 });
 
-      // mainContent.style.display = "none";
       sectionsContainer.style.display = "block";
       sections.forEach((section) => {
         if (section.id === hash) {
@@ -222,14 +253,22 @@ document.addEventListener("DOMContentLoaded", () => {
           section.style.display = "none";
         }
       });
-      if (!boxes.length) return;
-      boxes.forEach((box) => {
-        scene.remove(box);
-      });
-      boxes.length = 0;
+
+      // ボックスを削除する代わりに非表示にする
+      if (boxes.length) {
+        boxes.forEach((box) => {
+          gsap.to(box.scale, {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.5,
+            ease: "power3.in",
+          });
+        });
+      }
     } else {
       sectionsContainer.style.display = "none";
-      recreateBoxes(); // ボックスを再生成
+      recreateBoxes();
     }
   }
   // 環境光を追加
@@ -338,6 +377,8 @@ document.addEventListener("DOMContentLoaded", () => {
   animate();
   // ボックスへのクリックイベント追加
   window.addEventListener("click", (event) => {
+    stop = true;
+    // window.removeEventListener("mousemove", onMouseMove);
     homeLink.classList.remove("active");
 
     // マウス座標を正規化
@@ -353,16 +394,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const clickedBox = intersects[0].object;
       const sectionId = clickedBox.userData.sectionId;
 
-      // 他のアクション（セクション表示など）もここで追加可能
-      console.log(`Clicked on box for section: ${sectionId}`);
-      // ボックスを即座に削除し、boxes配列も空にする
-      boxes.forEach((box) => {
-        scene.remove(box);
+      // クリックされた時点で全てのボックスの動画を停止し初期状態に戻す
+      boxes.forEach((box, index) => {
+        stopVideo(index);
+        resetBox(index);
+
+        // ボックスを非表示にする
+        gsap.to(box.scale, {
+          x: 0,
+          y: 0,
+          z: 0,
+          duration: 0.5,
+          ease: "power3.in",
+        });
       });
-      boxes.length = 0; // boxes配列を空にする
-      window.location.hash = sectionId; // URLのハッシュを変更
-      // let index = boxes.indexOf(clickedBox); // クリックされたボックスのインデックス
-      // resetBox(index);
+
+      window.location.hash = sectionId;
     }
   });
 
@@ -416,30 +463,51 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
     });
   }
 
+  let photos = [];
+  let photoscene, photocamera, photorenderer;
+
   function setupGuiltyPhotos() {
+    // 既存のリソースをクリーンアップ
+    if (photorenderer) {
+      photos.forEach((photo) => {
+        if (photo.material.map) {
+          photo.material.map.dispose();
+        }
+        photo.material.dispose();
+        photo.geometry.dispose();
+        photoscene.remove(photo);
+      });
+      photos = [];
+      photorenderer.dispose();
+    }
+
     const container = document.getElementById("Canvas");
     const canvas = document.getElementById("threeCanvas");
-    const photoscene = new THREE.Scene();
-    const photocamera = new THREE.PerspectiveCamera(
+    photoscene = new THREE.Scene();
+    photocamera = new THREE.PerspectiveCamera(
       75,
       container.clientWidth / container.clientHeight,
       0.1,
       1000
     );
-    const photorenderer = new THREE.WebGLRenderer({
+    photorenderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
+      preserveDrawingBuffer: true,
     });
-    photorenderer.setSize(canvas.clientWidth, canvas.clientHeight);
 
     const loader = new THREE.TextureLoader();
+    loader.crossOrigin = "anonymous";
+
+    photorenderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    photorenderer.setPixelRatio(window.devicePixelRatio);
+
     const photoPaths = [
       "static/photo/Guilty1.JPG",
       "static/photo/Guilty2.jpg",
       "static/photo/Guilty3.JPG",
     ];
 
-    const photos = [];
     let loadedCount = 0;
 
     photoPaths.forEach((path, index) => {
@@ -458,32 +526,9 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
           const height = width / aspectRatio; // 高さをアスペクト比に基づいて計算
 
           const photogeometry = new THREE.PlaneGeometry(width, height);
-          const photomaterial = new THREE.ShaderMaterial({
-            uniforms: {
-              textureMap: { value: texture },
-              lightDirection: {
-                value: new THREE.Vector3(0.5, 1, 0.5).normalize(),
-              }, // 光の方向を設定
-            },
-            vertexShader: `
-          varying vec2 vUv;
-    varying vec3 vNormal; // 法線をフラグメントシェーダーに渡す
-    varying vec3 vPosition; // 頂点位置をフラグメントシェーダーに渡す
-
-    void main() {
-      vUv = uv;
-      vNormal = normal; // 法線を保存
-      vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-            fragmentShader: `
-          uniform sampler2D textureMap;
-          varying vec2 vUv;
-          void main() {
-            gl_FragColor = texture(textureMap, vUv);
-          }
-        `,
+          const photomaterial = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
           });
 
           // メッシュを作成
@@ -511,8 +556,28 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
 
     photocamera.position.z = 3;
 
+    function cleanup() {
+      if (photorenderer) {
+        cancelAnimationFrame(animationFrameId); // アニメーションを停止
+        photos.forEach((photo) => {
+          if (photo.material.map) {
+            photo.material.map.dispose();
+          }
+          photo.material.dispose();
+          photo.geometry.dispose();
+          photoscene.remove(photo);
+        });
+        photos = [];
+        photorenderer.dispose();
+      }
+    }
+
+    // ハッシュが変更されたときにクリーンアップを実行
+    window.addEventListener("hashchange", cleanup);
+
+    let animationFrameId;
     function animate() {
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
       photorenderer.render(photoscene, photocamera);
     }
 
@@ -558,43 +623,50 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
   }
 
   function recreateBoxes() {
-    // 既存のボックスを削除
-    boxes.forEach((box) => scene.remove(box));
-    boxes.length = 0;
-
-    // ボックスを再生成
-    boxes = materials.map((material, index) => {
-      const box = new THREE.Mesh(boxGeometry, materials[index]);
-      if (index === 0) {
-        box.position.set(0, 1, 2);
-      } else if (index === 1) {
-        box.position.set(2, -1, 2);
-      } else if (index === 2) {
-        box.position.set(-2, -1, 2);
+    stop = false;
+    // window.addEventListener("mousemove", onMouseMove);
+    // 動画テクスチャを再初期化
+    videoTextures.forEach((texture, index) => {
+      const video = texture.image;
+      if (video) {
+        video.currentTime = 0;
+        video.loop = true;
+        video.muted = true;
+        video.play().catch((e) => console.log("Video play failed:", e));
       }
-      box.userData.sectionId = sectionIds[index];
-      box.scale.set(0, 0, 0); // 初期状態でスケールを0に
-      scene.add(box);
-      // アニメーションで徐々にスケールを1に
+    });
+
+    boxes.forEach((box, index) => {
+      // マテリアルを初期状態に戻す
+      box.material.opacity = 1;
+      box.material.map = null;
+      box.material.needsUpdate = true;
+
+      // スケールを0にリセット
+      box.scale.set(0, 0, 0);
+
+      // アニメーションで徐々にスケールを1に戻す
       gsap.to(box.scale, {
         x: 1,
         y: 1,
         z: 1,
         duration: 1.5,
         ease: "power3.out",
+        onComplete: () => {
+          // ボックスのアニメーション完了後に動画を再生可能な状態にリセット
+          resetBox(index);
+        },
       });
-      console.log(`Box ${index} created:`, box);
-      return box;
     });
-    // boxes 配列の長さをログに出力
-    console.log("Boxes recreated, current length:", boxes.length);
-    // ボックスの動画をリセット;
-    boxes.forEach((box, index) => {
-      resetBox(index); // 動画をリセット
-    });
+
+    // 現在のインタラクション状態をリセット
+    currentIntersectedBox = null;
   }
 
   homeLink.addEventListener("click", (e) => {
+    recreateBoxes();
+    stop = false;
+    // window.addEventListener("mousemove", onMouseMove);
     e.preventDefault();
     sections.style.display = "none";
     homeLink.classList.add("active");
@@ -604,7 +676,8 @@ fragcolor(u_time,u_time+1,u_time+2,1.0);
       document.title,
       window.location.pathname + window.location.search
     );
-    recreateBoxes();
+
+    // playVideoSequence();
   });
 
   // コンタクトフォームの送信イベント
