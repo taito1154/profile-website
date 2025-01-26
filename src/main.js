@@ -20,10 +20,6 @@ let hashChangeListener;
 
 // グローバル変数として定義
 let mainRenderer = null;
-let photoscene;
-let photocamera;
-let photorenderer;
-let photos = [];
 
 function AnimateSection(section) {
   gsap.fromTo(
@@ -543,6 +539,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  let photos = [];
+  let photoscene, photocamera, photorenderer;
+
   let currentPhotoSetIndex = 0;
   const photoSets = [
     {
@@ -579,7 +578,6 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   ];
 
-  // setupGuiltyPhotosをグローバルスコープに移動
   function setupGuiltyPhotos() {
     // 前回のイベントリスナーを削除
     if (hashChangeListener) {
@@ -736,38 +734,113 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setupSwipeHandler() {
     let touchStartY = 0;
-    const canvas = document.getElementById("threeCanvas");
+    let currentY = 0; // currentYをここで定義
+    const container = document.querySelector(".work-section"); // containerの定義を修正
 
-    canvas.addEventListener("touchstart", (e) => {
-      touchStartY = e.touches[0].clientY;
-    });
+    const workSection = document.querySelector(".work-section");
+    if (workSection) {
+      workSection
+        .querySelectorAll(".scroll-indicator")
+        .forEach((el) => el.remove());
 
-    canvas.addEventListener("touchend", (e) => {
-      const touchEndY = e.changedTouches[0].clientY;
-      const deltaY = touchEndY - touchStartY;
-      const minSwipeDistance = 50; // 最小スワイプ距離
+      workSection.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="scroll-indicator scroll-up">
+          <img src="/static/photo/up.png" class="arrow" alt="scroll up">
+        </div>
+        <div class="scroll-indicator scroll-down">
+          <img src="/static/photo/down.png" class="arrow" alt="scroll down">
+        </div>
+      `
+      );
+    }
 
-      if (Math.abs(deltaY) > minSwipeDistance) {
-        if (deltaY < 0) {
-          // 上スワイプ
-          transitionToNextPhotoSet(1);
-        } else {
-          // 下スワイプ
-          transitionToNextPhotoSet(-1);
-        }
+    const scrollUpIndicator = document.querySelector(
+      ".scroll-indicator.scroll-up img"
+    );
+    const scrollDownIndicator = document.querySelector(
+      ".scroll-indicator.scroll-down img"
+    );
+
+    // 残りの処理は同じですが、style.borderColorの代わりにopacityのみを変更
+    let accumulatedDelta = 0;
+    const maxDelta = 200;
+    let lastWheelTime = 0;
+    let wheelTimeout;
+
+    document.querySelector(".work-section").addEventListener("wheel", (e) => {
+      if (isTransitioning) return;
+
+      const now = Date.now();
+      if (now - lastWheelTime > 100) {
+        accumulatedDelta = 0;
       }
-    });
+      lastWheelTime = now;
 
-    // PCでのホイールスクロール対応
-    canvas.addEventListener("wheel", (e) => {
-      if (Math.abs(e.deltaY) > 30) {
-        // スクロールの閾値
+      accumulatedDelta += Math.abs(e.deltaY);
+      const opacity = Math.min(0.1 + (accumulatedDelta / maxDelta) * 0.9, 1.0);
+
+      if (e.deltaY > 0) {
+        scrollDownIndicator.style.opacity = opacity;
+        scrollUpIndicator.style.opacity = "0.1";
+      } else {
+        scrollUpIndicator.style.opacity = opacity;
+        scrollDownIndicator.style.opacity = "0.1";
+      }
+
+      if (accumulatedDelta >= maxDelta) {
+        accumulatedDelta = 0;
         if (e.deltaY > 0) {
           transitionToNextPhotoSet(1);
         } else {
           transitionToNextPhotoSet(-1);
         }
       }
+
+      clearTimeout(wheelTimeout);
+      wheelTimeout = setTimeout(() => {
+        accumulatedDelta = 0;
+        scrollUpIndicator.style.opacity = "0.1";
+        scrollDownIndicator.style.opacity = "0.1";
+      }, 500);
+    });
+
+    // タッチイベントも同様に修正
+    let touchAccumulated = 0;
+
+    container.addEventListener("touchmove", (e) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = Math.abs(touchStartY - currentY);
+
+      touchAccumulated += deltaY;
+      const opacity = Math.min(0.1 + (touchAccumulated / maxDelta) * 0.9, 1.0);
+
+      if (touchStartY > currentY) {
+        scrollDownIndicator.style.opacity = opacity;
+        scrollUpIndicator.style.opacity = "0.1";
+      } else {
+        scrollUpIndicator.style.opacity = opacity;
+        scrollDownIndicator.style.opacity = "0.1";
+      }
+
+      touchStartY = currentY;
+    });
+
+    container.addEventListener("touchend", () => {
+      if (touchAccumulated >= maxDelta) {
+        if (touchStartY > currentY) {
+          transitionToNextPhotoSet(1);
+        } else {
+          transitionToNextPhotoSet(-1);
+        }
+      }
+      touchAccumulated = 0;
+
+      setTimeout(() => {
+        scrollUpIndicator.style.opacity = "0.1";
+        scrollDownIndicator.style.opacity = "0.1";
+      }, 500);
     });
   }
 
