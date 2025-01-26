@@ -529,6 +529,42 @@ document.addEventListener("DOMContentLoaded", () => {
   let photos = [];
   let photoscene, photocamera, photorenderer;
 
+  let currentPhotoSetIndex = 0;
+  const photoSets = [
+    {
+      name: "Guilty",
+      photos: [
+        "static/photo/Guilty1.JPG",
+        "static/photo/Guilty2.jpg",
+        "static/photo/Guilty3.JPG",
+      ],
+    },
+    {
+      name: "IWonder",
+      photos: [
+        "static/photo/IWonder1.jpg",
+        "static/photo/IWonder2.jpg",
+        "static/photo/IWonder3.JPG",
+      ],
+    },
+    {
+      name: "GENE",
+      photos: [
+        "static/photo/GENE1.JPG",
+        "static/photo/GENE2.JPG",
+        "static/photo/GENE3.JPG",
+      ],
+    },
+    {
+      name: "DLEAGUE",
+      photos: [
+        "static/photo/DLEAGUE1.JPG",
+        "static/photo/DLEAGUE2.JPG",
+        "static/photo/DLEAGUE3.JPG",
+      ],
+    },
+  ];
+
   function setupGuiltyPhotos() {
     // 既存のリソースをクリーンアップ
     if (photorenderer) {
@@ -588,121 +624,15 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", onResize);
     onResize(); // 初期サイズを設定
 
-    const loader = new THREE.TextureLoader();
-    loader.crossOrigin = "anonymous";
+    loadPhotoSet(currentPhotoSetIndex);
+    setupSwipeHandler();
 
-    photorenderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    photorenderer.setPixelRatio(window.devicePixelRatio);
-
-    const photoPaths = [
-      "static/photo/Guilty1.JPG",
-      "static/photo/Guilty2.jpg",
-      "static/photo/Guilty3.JPG",
-    ];
-
-    let loadedCount = 0;
-    let animationFrameId;
-
-    photoPaths.forEach((path, index) => {
-      loader.load(
-        path,
-        (texture) => {
-          const imageWidth = texture.image.width;
-          const imageHeight = texture.image.height;
-
-          // アスペクト比を計算
-          const aspectRatio = imageWidth / imageHeight;
-          const width = 2;
-          const height = width / aspectRatio;
-
-          const photogeometry = new THREE.PlaneGeometry(width, height);
-          const photomaterial = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-          });
-
-          const photo = new THREE.Mesh(photogeometry, photomaterial);
-
-          // 初期位置を設定：全ての写真を重ねて配置
-          photo.position.set(0, 0, -index * 0.01); // Z軸で少しずつずらして重ねる
-
-          // 2枚目と3枚目は最初は非表示
-          if (index > 0) {
-            photo.material.opacity = 0;
-          }
-
-          photoscene.add(photo);
-          photos.push(photo);
-
-          loadedCount++;
-          if (loadedCount === photoPaths.length) {
-            console.log("All photos loaded:", photos.length); // デバッグ用
-            animate();
-            setupHoverEffect();
-          }
-        },
-        undefined,
-        (err) => {
-          console.error(`Failed to load texture at ${path}`, err);
-        }
-      );
-    });
-
-    function setupHoverEffect() {
-      const canvas = document.getElementById("threeCanvas");
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      let isHovered = false;
-
-      canvas.addEventListener("mousemove", (event) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = ((event.clientX - rect.left) / canvas.clientWidth) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / canvas.clientHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, photocamera);
-        // 1枚目の写真だけを判定対象にする
-        const intersects = raycaster.intersectObject(photos[0]);
-
-        const currentlyHovered = intersects.length > 0;
-        if (currentlyHovered !== isHovered) {
-          isHovered = currentlyHovered;
-
-          if (isHovered) {
-            // ホバー時のアニメーション
-            gsap.to(photos[1].position, {
-              x: 2,
-              duration: 0.5,
-              ease: "power2.out",
-            });
-            gsap.to(photos[2].position, {
-              x: -2,
-              duration: 0.5,
-              ease: "power2.out",
-            });
-            gsap.to([photos[1].material, photos[2].material], {
-              opacity: 1,
-              duration: 0.5,
-            });
-          } else {
-            // マウスが離れた時のアニメーション
-            gsap.to(photos[1].position, {
-              x: 0,
-              duration: 0.5,
-              ease: "power2.in",
-            });
-            gsap.to(photos[2].position, {
-              x: 0,
-              duration: 0.5,
-              ease: "power2.in",
-            });
-            gsap.to([photos[1].material, photos[2].material], {
-              opacity: 0,
-              duration: 0.5,
-            });
-          }
-        }
-      });
+    // アニメーションループを開始
+    function animate() {
+      requestAnimationFrame(animate);
+      photorenderer.render(photoscene, photocamera);
     }
+    animate();
 
     // ハッシュが変更されたときのクリーンアップ処理
     const handleHashChange = () => {
@@ -719,27 +649,205 @@ document.addEventListener("DOMContentLoaded", () => {
         photos = [];
         photorenderer.dispose();
       }
-      cleanupBackScreen(); // 背景のクリーンアップも実行
+      cleanupBackScreen();
     };
 
-    // ハッシュが変更されたときにクリーンアップを実行
     window.addEventListener("hashchange", handleHashChange);
+  }
 
-    function animate() {
-      animationFrameId = requestAnimationFrame(animate);
-      photorenderer.render(photoscene, photocamera);
-    }
+  function loadPhotoSet(index) {
+    const photoSet = photoSets[index];
+    const loader = new THREE.TextureLoader();
+    let loadedCount = 0;
+    const totalPhotos = photoSet.photos.length;
 
-    function onResize() {
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
-      photocamera.aspect = width / height;
-      photocamera.updateProjectionMatrix();
-      photorenderer.setSize(width, height);
-    }
+    // 写真セット名を表示
+    const workTitle = document.querySelector(".work-section h2");
+    workTitle.textContent = photoSet.name;
 
-    window.addEventListener("resize", onResize);
-    onResize();
+    photoSet.photos.forEach((path, photoIndex) => {
+      loader.load(
+        path,
+        (texture) => {
+          const aspectRatio = texture.image.width / texture.image.height;
+          const width = 2;
+          const height = width / aspectRatio;
+
+          const photogeometry = new THREE.PlaneGeometry(width, height);
+          const photomaterial = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            side: THREE.DoubleSide,
+          });
+
+          const photo = new THREE.Mesh(photogeometry, photomaterial);
+          photo.position.set(0, 0, -photoIndex * 0.01);
+          photo.material.opacity = 0; // 初期状態は透明
+
+          photoscene.add(photo);
+          photos[photoIndex] = photo; // インデックスを保持
+
+          loadedCount++;
+          if (loadedCount === totalPhotos) {
+            // すべての写真が読み込まれた後にフェードインとホバーエフェクトを設定
+            gsap.to(photos[0].material, {
+              opacity: 1,
+              duration: 0.5,
+              onComplete: () => {
+                setupHoverEffect();
+              },
+            });
+          }
+        },
+        undefined,
+        (err) => console.error(`Failed to load texture at ${path}`, err)
+      );
+    });
+  }
+
+  function setupSwipeHandler() {
+    let touchStartY = 0;
+    const canvas = document.getElementById("threeCanvas");
+
+    canvas.addEventListener("touchstart", (e) => {
+      touchStartY = e.touches[0].clientY;
+    });
+
+    canvas.addEventListener("touchend", (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchEndY - touchStartY;
+      const minSwipeDistance = 50; // 最小スワイプ距離
+
+      if (Math.abs(deltaY) > minSwipeDistance) {
+        if (deltaY < 0) {
+          // 上スワイプ
+          transitionToNextPhotoSet(1);
+        } else {
+          // 下スワイプ
+          transitionToNextPhotoSet(-1);
+        }
+      }
+    });
+
+    // PCでのホイールスクロール対応
+    canvas.addEventListener("wheel", (e) => {
+      if (Math.abs(e.deltaY) > 30) {
+        // スクロールの閾値
+        if (e.deltaY > 0) {
+          transitionToNextPhotoSet(1);
+        } else {
+          transitionToNextPhotoSet(-1);
+        }
+      }
+    });
+  }
+
+  function transitionToNextPhotoSet(direction) {
+    const nextIndex =
+      (currentPhotoSetIndex + direction + photoSets.length) % photoSets.length;
+
+    // アニメーション中は新しい遷移を防ぐためのフラグ
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    // 現在の写真をフェードアウト
+    gsap.to(
+      photos.map((photo) => photo.material),
+      {
+        opacity: 0,
+        duration: 0.5,
+        onComplete: () => {
+          // 既存の写真を完全にクリーンアップ
+          photos.forEach((photo) => {
+            if (photo.material.map) {
+              photo.material.map.dispose();
+            }
+            photo.material.dispose();
+            photo.geometry.dispose();
+            photoscene.remove(photo);
+          });
+          photos = [];
+
+          // 新しい写真セットをロード
+          currentPhotoSetIndex = nextIndex;
+          loadPhotoSet(currentPhotoSetIndex);
+
+          // トランジション完了フラグを解除
+          isTransitioning = false;
+        },
+      }
+    );
+  }
+
+  // グローバル変数としてトランジション状態を追加
+  let isTransitioning = false;
+
+  function setupHoverEffect() {
+    const canvas = document.getElementById("threeCanvas");
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isHovered = false;
+
+    canvas.addEventListener("mousemove", (event) => {
+      // トランジション中やphotosが不完全な場合は処理をスキップ
+      if (
+        isTransitioning ||
+        !photos.length ||
+        !photos[0] ||
+        !photos[1] ||
+        !photos[2]
+      )
+        return;
+
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / canvas.clientWidth) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / canvas.clientHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, photocamera);
+
+      try {
+        const intersects = raycaster.intersectObject(photos[0]);
+        const currentlyHovered = intersects.length > 0;
+
+        if (currentlyHovered !== isHovered) {
+          isHovered = currentlyHovered;
+
+          if (isHovered) {
+            gsap.to(photos[1].position, {
+              x: 2,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+            gsap.to(photos[2].position, {
+              x: -2,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+            gsap.to([photos[1].material, photos[2].material], {
+              opacity: 1,
+              duration: 0.5,
+            });
+          } else {
+            gsap.to(photos[1].position, {
+              x: 0,
+              duration: 0.5,
+              ease: "power2.in",
+            });
+            gsap.to(photos[2].position, {
+              x: 0,
+              duration: 0.5,
+              ease: "power2.in",
+            });
+            gsap.to([photos[1].material, photos[2].material], {
+              opacity: 0,
+              duration: 0.5,
+            });
+          }
+        }
+      } catch (error) {
+        console.warn("Hover effect error:", error);
+      }
+    });
   }
 
   // コンタクトフォームのアニメーション関数
