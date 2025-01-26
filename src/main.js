@@ -11,6 +11,15 @@ let first = false;
 // グローバル変数として定義
 let boxes = [];
 let videoTextures = [];
+let animationFrameId;
+let isTransitioning = false;
+
+// グローバル変数を追加
+let cleanupBackScreenCallback;
+let hashChangeListener;
+
+// グローバル変数として定義
+let mainRenderer = null;
 
 function AnimateSection(section) {
   gsap.fromTo(
@@ -22,41 +31,42 @@ function AnimateSection(section) {
 
 function firsthandleRouting() {
   const hash = window.location.hash.substring(1);
-  const sections = document.querySelectorAll(".section");
-  const mainContent = document.querySelector(".main-content");
+  if (!hash || hash === "home") return;
+
+  // アニメーション要素の初期状態を設定
+  const elements = {
+    ".video-container": { opacity: 0.8, scale: 1, zIndex: -1 },
+    ".frame-left, .frame-right": { scaleY: 1, opacity: 1 },
+    ".frame-top, .frame-bottom": { scaleX: 1, opacity: 1 },
+    ".main-header": { opacity: 1, y: 0 },
+    footer: { y: 0, opacity: 1 },
+  };
+
+  // 既存のアニメーションを停止し、要素の状態を設定
+  Object.entries(elements).forEach(([selector, props]) => {
+    gsap.killTweensOf(selector);
+    gsap.set(selector, props);
+  });
+
+  // セクションの表示を制御
   const sectionsContainer = document.querySelector(".sections");
+  const sections = document.querySelectorAll(".section");
 
-  if (hash && hash !== "home") {
-    first = true;
-    gsap.killTweensOf(
-      ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
-    );
-    gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
-    gsap.set(".frame-left, .frame-right", {
-      scaleY: 1,
-      opacity: 1,
-    });
-    gsap.set(".frame-top, .frame-bottom", {
-      scaleX: 1,
-      opacity: 1,
-    });
-    gsap.set(".main-header", { opacity: 1, y: 0 });
-    gsap.set("footer", { y: 0, opacity: 1 });
+  sectionsContainer.style.display = "block";
+  sections.forEach((section) => {
+    const isTargetSection = section.id === hash;
+    section.style.display = isTargetSection ? "block" : "none";
 
-    // mainContent.style.display = "none";
-    sectionsContainer.style.display = "block";
-    sections.forEach((section) => {
-      if (section.id === hash) {
-        section.style.display = "block";
-        AnimateSection(section);
-        if (section.id === "work") {
-          // fsetupGuiltyPhotos();
-        }
-      } else {
-        section.style.display = "none";
+    if (isTargetSection) {
+      AnimateSection(section);
+      // 特定のセクションに対する追加処理
+      if (hash === "work") {
+        // setupGuiltyPhotos();
       }
-    });
-  }
+    }
+  });
+
+  first = true;
 }
 firsthandleRouting();
 // Initial animation
@@ -224,50 +234,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleRouting() {
     const hash = window.location.hash.substring(1);
-    const sections = document.querySelectorAll(".section");
-    const mainContent = document.querySelector(".main-content");
     const sectionsContainer = document.querySelector(".sections");
+    const sections = document.querySelectorAll(".section");
 
     if (hash && hash !== "home") {
-      gsap.killTweensOf(
-        ".video-container, .frame-left, .frame-right, .frame-top, .frame-bottom, .main-header, footer"
-      );
-      gsap.set(".video-container", { opacity: 0.8, scale: 1, zIndex: -1 });
-      gsap.set(".frame-left, .frame-right", {
-        scaleY: 1,
-        opacity: 1,
-      });
-      gsap.set(".frame-top, .frame-bottom", {
-        scaleX: 1,
-        opacity: 1,
-      });
-      gsap.set(".main-header", { opacity: 1, y: 0 });
-      gsap.set("footer", { y: 0, opacity: 1 });
+      // アニメーション要素の初期状態を設定
+      const elements = {
+        ".video-container": { opacity: 0.8, scale: 1, zIndex: -1 },
+        ".frame-left, .frame-right": { scaleY: 1, opacity: 1 },
+        ".frame-top, .frame-bottom": { scaleX: 1, opacity: 1 },
+        ".main-header": { opacity: 1, y: 0 },
+        footer: { y: 0, opacity: 1 },
+      };
 
+      // 既存のアニメーションを停止し、要素の状態を設定
+      const selectors = Object.keys(elements).join(", ");
+      gsap.killTweensOf(selectors);
+      Object.entries(elements).forEach(([selector, props]) => {
+        gsap.set(selector, props);
+      });
+
+      // セクションの表示を制御
       sectionsContainer.style.display = "block";
       sections.forEach((section) => {
-        if (section.id === hash) {
-          section.style.display = "block";
+        const isTargetSection = section.id === hash;
+        section.style.display = isTargetSection ? "block" : "none";
+
+        if (isTargetSection) {
           animateSection(section);
           if (section.id === "work") {
             setupGuiltyPhotos();
           }
-        } else {
-          section.style.display = "none";
         }
       });
 
-      // ボックスを削除する代わりに非表示にする
+      // ボックスのアニメーション
       if (boxes.length) {
-        boxes.forEach((box) => {
-          gsap.to(box.scale, {
+        gsap.to(
+          boxes.map((box) => box.scale),
+          {
             x: 0,
             y: 0,
             z: 0,
             duration: 0.5,
             ease: "power3.in",
-          });
-        });
+          }
+        );
       }
     } else {
       sectionsContainer.style.display = "none";
@@ -284,15 +296,17 @@ document.addEventListener("DOMContentLoaded", () => {
   scene.add(directionalLight);
 
   const boxGeometry = new THREE.BoxGeometry(1.3, 1.3, 1.3);
-  // 動画テクスチャを作成する関数
+  // 動画テクスチャを作成する関数を修正
   function createVideoTexture(src) {
     const video = document.createElement("video");
     video.src = src;
     video.loop = true;
     video.muted = true;
-    // video.autoplay = true; // 自動再生を設定
     video.play();
+
     const texture = new THREE.VideoTexture(video);
+    // texture.flipY = true; // 先ほどの修正を適用
+    // texture.premultiplyAlpha = false; // 必要に応じて設定
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -308,7 +322,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     return texture;
-    // return new THREE.VideoTexture(video);
   }
 
   function createBoxes() {
@@ -566,25 +579,20 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function setupGuiltyPhotos() {
-    // 既存のリソースをクリーンアップ
-    if (photorenderer) {
-      photos.forEach((photo) => {
-        if (photo.material.map) {
-          photo.material.map.dispose();
-        }
-        photo.material.dispose();
-        photo.geometry.dispose();
-        photoscene.remove(photo);
-      });
-      photos = [];
-      photorenderer.dispose();
+    // 前回のイベントリスナーを削除
+    if (hashChangeListener) {
+      window.removeEventListener("hashchange", hashChangeListener);
     }
 
-    // backScreenを先に実行して背景を設定
-    const cleanupBackScreen = backScreen();
+    // 前回のbackScreenをクリーンアップ
+    if (cleanupBackScreenCallback) {
+      cleanupBackScreenCallback();
+    }
 
     const container = document.getElementById("Canvas");
     const canvas = document.getElementById("threeCanvas");
+
+    // シーンとカメラの設定
     photoscene = new THREE.Scene();
     photocamera = new THREE.PerspectiveCamera(
       75,
@@ -592,20 +600,19 @@ document.addEventListener("DOMContentLoaded", () => {
       0.1,
       1000
     );
-    photorenderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      alpha: true,
-      preserveDrawingBuffer: true,
-    });
 
-    // キャンバスのスタイルを設定
-    canvas.style.position = "absolute";
-    canvas.style.top = "0";
-    canvas.style.left = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
+    // レンダラーの再利用または新規作成
+    if (!mainRenderer) {
+      mainRenderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        preserveDrawingBuffer: true,
+        antialias: true,
+      });
+    }
+    photorenderer = mainRenderer;
 
-    // レンダラーのサイズを設定
+    // レンダラーの設定
     photorenderer.setSize(container.clientWidth, container.clientHeight);
     photorenderer.setPixelRatio(window.devicePixelRatio);
 
@@ -629,15 +636,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // アニメーションループを開始
     function animate() {
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
       photorenderer.render(photoscene, photocamera);
     }
     animate();
 
     // ハッシュが変更されたときのクリーンアップ処理
-    const handleHashChange = () => {
+    hashChangeListener = () => {
       if (photorenderer) {
-        cancelAnimationFrame(animationFrameId);
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
         photos.forEach((photo) => {
           if (photo.material.map) {
             photo.material.map.dispose();
@@ -649,10 +658,12 @@ document.addEventListener("DOMContentLoaded", () => {
         photos = [];
         photorenderer.dispose();
       }
-      cleanupBackScreen();
+      if (cleanupBackScreenCallback) {
+        cleanupBackScreenCallback();
+      }
     };
 
-    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("hashchange", hashChangeListener);
   }
 
   function loadPhotoSet(index) {
@@ -677,7 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const photomaterial = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            side: THREE.DoubleSide,
+            // side: THREE.DoubleSide,
           });
 
           const photo = new THREE.Mesh(photogeometry, photomaterial);
@@ -779,9 +790,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // グローバル変数としてトランジション状態を追加
-  let isTransitioning = false;
-
   function setupHoverEffect() {
     const canvas = document.getElementById("threeCanvas");
     const raycaster = new THREE.Raycaster();
@@ -881,7 +889,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function recreateBoxes() {
     stop = false;
-    // window.addEventListener("mousemove", onMouseMove);
     // 動画テクスチャを再初期化
     videoTextures.forEach((texture, index) => {
       const video = texture.image;
@@ -988,9 +995,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     gsap.from(".main-header", {
       opacity: 0,
-      y: -50,
-      duration: 1,
-      ease: "power3.out",
       delay: PARAMS.introAnimationDuration * 0.5,
     });
     // フレームのアニメーション
@@ -1030,4 +1034,26 @@ document.addEventListener("DOMContentLoaded", () => {
     .on("change", () => {
       console.log("Animation speed changed:", PARAMS.animationSpeed);
     });
+
+  // クリーンアップ時にレンダラーを完全に破棄しない
+  function cleanupPhotoScene() {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+
+    if (photoscene) {
+      while (photoscene.children.length > 0) {
+        const object = photoscene.children[0];
+        if (object.material) {
+          if (object.material.map) object.material.map.dispose();
+          object.material.dispose();
+        }
+        if (object.geometry) object.geometry.dispose();
+        photoscene.remove(object);
+      }
+    }
+
+    photos = [];
+    // レンダラーは破棄せず、次回も再利用
+  }
 });
