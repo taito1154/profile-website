@@ -20,6 +20,10 @@ let hashChangeListener;
 
 // グローバル変数として定義
 let mainRenderer = null;
+let photoscene;
+let photocamera;
+let photorenderer;
+let photos = [];
 
 function AnimateSection(section) {
   gsap.fromTo(
@@ -237,6 +241,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const sectionsContainer = document.querySelector(".sections");
     const sections = document.querySelectorAll(".section");
 
+    // ボックスを非表示にする処理を最初に実行
+    if (boxes.length) {
+      gsap.to(
+        boxes.map((box) => box.scale),
+        {
+          x: 0,
+          y: 0,
+          z: 0,
+          duration: 0.5,
+          ease: "power3.in",
+        }
+      );
+    }
+
     if (hash && hash !== "home") {
       // アニメーション要素の初期状態を設定
       const elements = {
@@ -267,20 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       });
-
-      // ボックスのアニメーション
-      if (boxes.length) {
-        gsap.to(
-          boxes.map((box) => box.scale),
-          {
-            x: 0,
-            y: 0,
-            z: 0,
-            duration: 0.5,
-            ease: "power3.in",
-          }
-        );
-      }
     } else {
       sectionsContainer.style.display = "none";
       createBoxes();
@@ -539,9 +543,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  let photos = [];
-  let photoscene, photocamera, photorenderer;
-
   let currentPhotoSetIndex = 0;
   const photoSets = [
     {
@@ -578,6 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   ];
 
+  // setupGuiltyPhotosをグローバルスコープに移動
   function setupGuiltyPhotos() {
     // 前回のイベントリスナーを削除
     if (hashChangeListener) {
@@ -589,10 +591,29 @@ document.addEventListener("DOMContentLoaded", () => {
       cleanupBackScreenCallback();
     }
 
+    // 既存のリソースをクリーンアップ
+    if (photorenderer) {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      photos.forEach((photo) => {
+        if (photo.material.map) {
+          photo.material.map.dispose();
+        }
+        photo.material.dispose();
+        photo.geometry.dispose();
+        photoscene.remove(photo);
+      });
+      photos = [];
+    }
+
+    // シェーダーの背景を再初期化
+    cleanupBackScreenCallback = backScreen();
+
+    // 新しいレンダラーのセットアップ
     const container = document.getElementById("Canvas");
     const canvas = document.getElementById("threeCanvas");
 
-    // シーンとカメラの設定
     photoscene = new THREE.Scene();
     photocamera = new THREE.PerspectiveCamera(
       75,
@@ -601,18 +622,15 @@ document.addEventListener("DOMContentLoaded", () => {
       1000
     );
 
-    // レンダラーの再利用または新規作成
-    if (!mainRenderer) {
-      mainRenderer = new THREE.WebGLRenderer({
+    if (!photorenderer) {
+      photorenderer = new THREE.WebGLRenderer({
         canvas: canvas,
         alpha: true,
         preserveDrawingBuffer: true,
         antialias: true,
       });
     }
-    photorenderer = mainRenderer;
 
-    // レンダラーの設定
     photorenderer.setSize(container.clientWidth, container.clientHeight);
     photorenderer.setPixelRatio(window.devicePixelRatio);
 
