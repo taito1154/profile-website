@@ -546,6 +546,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoSets = [
     {
       name: "Guilty",
+      title: "Work",
+      genre: "Coreography",
+      Artist: "BE:FIRST",
       photos: [
         "static/photo/Guilty1.JPG",
         "static/photo/Guilty2.jpg",
@@ -554,6 +557,9 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       name: "IWonder",
+      title: "Work",
+      genre: "Coreography",
+      Artist: "Daice",
       photos: [
         "static/photo/IWonder1.jpg",
         "static/photo/IWonder2.jpg",
@@ -561,7 +567,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ],
     },
     {
-      name: "GENE",
+      name: "GENERATIONS",
+      title: "Work",
+      genre: "Back Dancer",
+      Artist: "GENERATIONS",
       photos: [
         "static/photo/GENE1.JPG",
         "static/photo/GENE2.JPG",
@@ -570,6 +579,9 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       name: "DLEAGUE",
+      title: "Work",
+      genre: " Team Member",
+      Artist: "AVEX Royal Brats",
       photos: [
         "static/photo/DLEAGUE1.JPG",
         "static/photo/DLEAGUE2.JPG",
@@ -688,9 +700,29 @@ document.addEventListener("DOMContentLoaded", () => {
     let loadedCount = 0;
     const totalPhotos = photoSet.photos.length;
 
-    // 写真セット名を表示
-    const workTitle = document.querySelector(".work-section h2");
-    workTitle.textContent = photoSet.name;
+    let workInfo = document.querySelector(".work-info");
+    if (!workInfo) {
+      const workSection = document.querySelector(".work-section");
+      workInfo = document.createElement("div");
+      workInfo.className = "work-info";
+      workInfo.innerHTML = `
+        <h2 class="work-title">Work</h2>
+        <h3 class="work-name"></h3>
+        <p class="work-genre"></p>
+        <p class="work-Artist"></p>
+      `;
+      workSection.appendChild(workInfo);
+    }
+
+    const workTitle = workInfo.querySelector(".work-title");
+    const workName = workInfo.querySelector(".work-name");
+    const workGenre = workInfo.querySelector(".work-genre");
+    const workDescription = workInfo.querySelector(".work-Artist");
+
+    if (workTitle) workTitle.textContent = photoSet.title;
+    if (workName) workName.textContent = photoSet.name;
+    if (workGenre) workGenre.textContent = photoSet.genre;
+    if (workDescription) workDescription.textContent = photoSet.Artist;
 
     photoSet.photos.forEach((path, photoIndex) => {
       loader.load(
